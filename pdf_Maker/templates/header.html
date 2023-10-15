@@ -1,0 +1,31 @@
+
+<header>
+    <nav>
+        <h1 class="logo">PDF Maker</h1>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li class="dropdown">
+                <a href="#" class="dropbtn">Features</a>
+                <div class="dropdown-content">
+                    <a href="image-to-pdf">convert image to pdf</a>
+                    <a href="excel to pdf">convert .excel to pdf</a>
+                    <a href="#">Feature 3</a>
+                    <!-- Add more feature links as needed -->
+                </div>
+            </li>{% if request.session.user_id %}
+            <li><a href="/logout">Logout</a></li>
+             {% else %} 
+            <li><a href="/login/" style="border:2px solid red;">Login</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+</header>
+<div style="margin-top: 100px; text-align: center;">
+    <h2>Welcome to PDF Maker!</h2>
+    <p>Create and manage your PDFs with ease.</p>
+</div>
+
+
+
+</body>
+</html>

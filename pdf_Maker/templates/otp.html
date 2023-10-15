@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/otpstyles.css">
+    <title>OTP Entry</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Enter 6-Digit OTP</h1>
+        <form  method="post">
+            {% csrf_token %}
+            <input type="text" name="otp" id="otp" maxlength="6" placeholder="{% if incorrect %}incorrect otp re-type{% endif %}" pattern="[0-9]{6}" required>
+            <button type="submit">Verify</button>
+        </form>
+        <h2>Check your email you provided <br> Through signup</h2>
+    </div>
+</body>
+</html>
