@@ -17,18 +17,27 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from pdf_Maker import views
+from django.conf import settings
+from django.conf.urls.static import static
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('',views.home),
-    path('login/',views.loginto),
-    path('logout/',views.logout),
-    path('signup/',views.signup),
-    path('otp-verification',views.otp),
-    path('forget-password/',views.forgetpass),   
-    path('forget-password-OTP/',views.forget_otp), 
+    path('',views.home,name='Home'),
+    path('login/',views.loginto,name='Login'),
+    path('logout/',views.logout,name='Logout'),
+    path('signup/',views.signup,name='Signup'),
+    path('otp-verification',views.otp,name='Signup-otp'),
+    path('forget-password/',views.forgetpass,name='Forget-password'),   
+    path('forget-password-OTP/',views.forget_otp,name='Forget-otp'), 
+    path('user-profile/',views.profile,name='Profile'),
+    path('profile-picture-update',views.update_picture,name='Update-picture'),
+    path('profile-picture-remove',views.remove_picture,name='Remove-picture'),
+    path('delete-account/',views.delete_account,name='Delete-account'),
     path('image-to-pdf/',views.imgTo_pdf),
     path('excel to pdf/',views.excelTo_pdf),
     
     
 ]
+if settings.DEBUG:
+    urlpatterns+=static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)

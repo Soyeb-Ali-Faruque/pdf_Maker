@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+{% load static %}
+
+<div class="profile-container">
+    <div class="profile-section">
+        <div class="profile-pic">
+            {% if user.profile_picture %}
+                <img src="{{ user.profile_picture.url }}">
+            {% else %}
+                <img src="{% static 'img/noprofile.jpg' %}" >
+            {% endif %}
+        </div>
+        <div class="profile-buttons">
+            <form method="post" action="{% url 'Update-picture' %}" enctype="multipart/form-data" id="profile-picture-form">
+                {% csrf_token %}
+                <input type="file" name="profile_picture" id="profile-picture-input" style="display: none;" onchange="displayFileName(this)">
+                <button type="button" onclick="chooseProfilePicture()">{% if user.profile_picture %} Change Picture{% else %}upload a photo {% endif %}</button>
+            </form>
+            <script src="{% static 'js/profile.js' %}"></script>
+            
+            <form method="post" action="{% url 'Remove-picture' %}">
+                {% csrf_token %}
+                <button type="submit" class="remove-picture-button">Remove Picture</button>
+            </form>
+        </div>
+    </div>
+    <div class="user-details">
+        <div class="field" >
+            <label for="name">Name</label>
+            <div class="editable">{{user.name}}</div>
+        </div>
+        <div class="field" >
+            <label for="username">Username</label>
+            <div class="editable">{{user.userName}}</div>
+        </div>
+        <div class="field">
+            <label for="email">Email</label>
+            <div class="non-editable">{{user.email}}</div>
+        </div>
+        <a href="{% url 'Forget-password' %}" class="reset-password-link">Reset Password</a>
+        <form method="post" action="{% url 'Delete-account' %}">
+            {% csrf_token %}
+            <button type="submit" class="delete-account-button">Delete Account</button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

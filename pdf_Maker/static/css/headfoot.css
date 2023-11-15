@@ -1,3 +1,4 @@
+/* ---------------------header------------------------- */
 body {
     margin: 0;
     font-family: Arial, sans-serif;
@@ -51,9 +52,6 @@ nav {
     border-color: red;
 }
 
-/* Existing styles... */
-
-/* Style the dropdown button */
 .dropbtn {
     color: grey;
     padding: 10px;
@@ -88,21 +86,80 @@ nav {
     display: block;
 }
 
+/* Style for the circular profile picture */
+.circular-icon {
+    width: 60px; /* Set the desired width */
+    height: 60px; /* Set the desired height */
+    border-radius: 50%;
+    object-fit: cover;
+    /* Additional styles as needed */
+  }
+  
 
 
 
+/* Style for the user's name */
+.user-name {
+    font-weight: bold;
+    font-size: 16px;
+    margin: 0;
+    white-space: nowrap; 
+}
 
+/* Style for the user profile options (hidden by default) */
+.profile-options {
+    display: none;
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    right: 0;
+    top: 60px;
+    z-index: 1;
+}
 
+/* Style for the user profile container */
+.user-profile {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
 
+/* Style for the profile options when shown */
+.user-profile:hover #profile-options {
+    display: block;
+}
+
+/* Style for the profile option links */
+.profile-options a {
+    padding: 15px 20px;
+    text-decoration: none;
+    display: block;
+    text-align: left;
+    color: #0074a2;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+/* Add hover effect for the links */
+.profile-options a:hover {
+    background-color: #0074a2;
+    color: #fff;
+}
+
+/* Add space between the links */
+.profile-options a + a {
+    margin-top: 30px;
+}
+
+/* -------------------------footer------------------------------ */
 /* Footer Styling */
-
-/* Footer Styling */
-
 .footer {
     background-color: #333;
     color: #fff;
     padding: 50px 0;
-    margin-top: 250px; 
+    margin-top: 250px;
 }
 
 .footer-container {
@@ -150,19 +207,19 @@ nav {
     text-align: center;
     margin-top: 30px;
 }
+
 .follow a img {
     width: 20px;
-    height: 20px; 
+    height: 20px;
 }
+
 .footer-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.important-links,
-.contact,
-.follow {
+.important-links, .contact, .follow {
     flex: 1;
     text-align: center;
 }

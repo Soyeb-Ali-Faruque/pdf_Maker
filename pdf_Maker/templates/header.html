@@ -1,4 +1,4 @@
-
+{% load static %}
 <header>
     <nav>
         <h1 class="logo">PDF Maker</h1>
@@ -12,20 +12,33 @@
                     <a href="#">Feature 3</a>
                     <!-- Add more feature links as needed -->
                 </div>
-            </li>{% if request.session.user_id %}
-            <li><a href="/logout">Logout</a></li>
-             {% else %} 
+            </li>
+            {% if request.session.user_id %}
+            <li>
+                <div class="user-profile" id="user-profile">
+                 {% if user.profile_picture  %} 
+                        <img class="circular-icon" src="{{ user.profile_picture.url }}">
+                   {% else %}
+                   <img class="circular-icon" src="{% static 'img/noprofile.jpg' %}">
+                    {% endif %} 
+                <!--    <p class="user-name">{{user.userName}}</p>-->
+                    <div class="profile-options" id="profile-options">
+                        <
+                        <a href="{% url 'Profile' %}">Profile</a>
+                        <a href="/history">History</a>
+                        <a href="/logout">Logout</a>
+                    </div>
+                </div>
+            </li>
+        {% else %} 
             <li><a href="/login/" style="border:2px solid red;">Login</a></li>
-            {% endif %}
+        {% endif %}
         </ul>
     </nav>
 </header>
-<div style="margin-top: 100px; text-align: center;">
-    <h2>Welcome to PDF Maker!</h2>
-    <p>Create and manage your PDFs with ease.</p>
-</div>
 
 
 
-</body>
-</html>
+
+
+

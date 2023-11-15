@@ -1,0 +1,111 @@
+.profile-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 100px; /* Adjust the margin-top as needed */
+    padding: 20px;
+}
+
+.profile-section {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+/* Styling for the circular profile picture container */
+.profile-pic {
+    width: 150px;
+    height: 150px;
+    background-color: #ccc;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-right: 20px;
+    
+}
+
+/* Styling for the image inside the circular container */
+.profile-pic img {
+    width: 100%; /* Set the width to 100% to cover the circular container */
+    height: 100%; /* Set the height to 100% to cover the circular container */
+    object-fit: cover;
+    border-radius: 50%; 
+}
+
+.profile-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+form {
+    margin-bottom: 10px;
+}
+
+button {
+    padding: 5px 10px;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.user-details {
+    flex-grow: 1;
+    padding: 20px;
+}
+
+.field {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.editable {
+    display: inline-block;
+    border-bottom: 1px dashed #666;
+    cursor: pointer;
+}
+
+.non-editable {
+    display: inline-block;
+}
+
+.reset-password-link {
+    color: blue; /* Change the color as needed */
+    cursor: pointer;
+    text-decoration: underline;
+    margin-top: 10px;
+    display: block;
+}
+
+.delete-account-button {
+    background-color: red;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+#profile-picture-form button[type="button"] {
+    background-color: #3498db; /* Choose your desired background color */
+    color: #fff; /* Choose your desired text color */
+    padding: 10px 20px; /* Adjust padding as needed */
+    border: none;
+    cursor: pointer;
+}
+
+.remove-picture-button {
+    background-color: #e74c3c; /* Choose your desired background color */
+    color: #fff; /* Choose your desired text color */
+    padding: 10px 20px; /* Adjust padding as needed */
+    border: none;
+    cursor: pointer;
+}

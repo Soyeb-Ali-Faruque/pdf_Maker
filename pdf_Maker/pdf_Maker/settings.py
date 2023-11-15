@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'pdf_Maker',
     'userlogin',
+    'userHistory',
     
 ]
 
@@ -130,4 +131,8 @@ EMAIL_PORT=587
 EMAIL_HOST_USER='sohebfaruque@gmail.com'
 EMAIL_HOST_PASSWORD='doprxiabwrseeprz'
 EMAIL_USE_TLS=True
+
+#media
+MEDIA_ROOT=BASE_DIR/"media"
+MEDIA_URL="/media/"
 

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+<div class="confirm-delete-container">
+    <h2>Confirm Account Deletion</h2>
+    <p>Please enter your password to confirm the account deletion.</p>
+    
+    <form method="post" action="{% url 'Delete-account' %}">
+        {% csrf_token %}
+        {% if userPassword  and request.method == 'POST' and 'password' in request.POST  %}
+        <p style="color: red;">Incorrect password. Please enter the correct password.</p>
+      {% endif %}
+        <input type="password" name="password" class="password-input" placeholder="Enter your password" required>
+        <button type="submit" class="confirm-button">Confirm Deletion</button>
+    </form>
+</div>
+{% endblock %}
