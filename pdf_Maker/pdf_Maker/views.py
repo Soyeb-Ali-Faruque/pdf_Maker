@@ -16,7 +16,10 @@ import io
 
 
 def home(request):
-    return render(request,'index.html')
+    user_id=request.session.get('user_id')
+    user_information=userdata.objects.get(pk=user_id)
+    
+    return render(request,'index.html',{'user':user_information})
 
 def loginto(request):
     message_password_updated=request.GET.get('passwordUpdated',False)
@@ -201,53 +204,9 @@ def delete_account(request):
         else:
             return render(request,'deleteAccount.html',{'userPassword':True})
     return render(request,'deleteAccount.html')
-#text to pdf
-def txtTo_pdf(request):
-    pass
 
+#generate pdf
 
-#photo to pdf
-def imgTo_pdf(request):
-    data={
-        'type':'.png .jpg .jpeg',
-        'suported':'.png,.jpg,.jpeg'
-    }
-    if request.method=="POST" and request.FILES.getlist("photo"):
-        # storing photos of users
-        photos=request.FILES.getlist('photo')
-        
-        # Create a PDF file in memory with A4 page size
-        pdf_buffer = io.BytesIO()
-        pdf = canvas.Canvas(pdf_buffer, pagesize=A4)
-        
-         # Calculate the dimensions for A4 size
-        width, height = A4
-
-        # Calculate the initial coordinates for the first image
-        x, y = 30, height - 30 
-
-        # Loop through the uploaded photos and add them to the PDF
-        for photo in photos:
-           
-            if photo.content_type.startswith('image'):
-                # Draw the image on the PDF
-                pdf.drawImage(photo, x, y, width=width, height=height, preserveAspectRatio=True)
-                pdf.showPage()  # Start a new page for the next image
-
-        # Save the PDF
-        pdf.save()
-
-        # Get the PDF content as bytes
-        pdf_bytes = pdf_buffer.getvalue()
-        pdf_buffer.close()
-        return render(request,'MakePDF.html',{'generatedPDF':pdf_bytes})
-
-    return render(request,'MakePDF.html',data)
-
-
-#excel to pdf
-def excelTo_pdf(request):
-    data={
-        'type':'xlsx'
-    }
-    return render(request,'MakePDF.html',data)
+def generate_pdf(request,file_type):
+    
+    return render(request,'MakePDF.html')
