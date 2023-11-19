@@ -4,7 +4,7 @@ from django.contrib import messages
 
 #used for login system
 from django.contrib.auth.hashers import make_password, check_password
-from userlogin.models import userdata
+from userData.models import userdata
 from django.core.mail import send_mail
 import random
 

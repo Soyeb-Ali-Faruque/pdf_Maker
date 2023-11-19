@@ -38,8 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'pdf_Maker',
-    'userlogin',
-    'userHistory',
+    'userData',
+    
     
 ]
 
