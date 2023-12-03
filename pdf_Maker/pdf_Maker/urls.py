@@ -34,7 +34,9 @@ urlpatterns = [
     path('profile-picture-update',views.update_picture,name='Update-picture'),
     path('profile-picture-remove',views.remove_picture,name='Remove-picture'),
     path('delete-account/',views.delete_account,name='Delete-account'),
-    path('convert-file/<str:file_type>',views.generate_pdf,name='generatePDF'),
+    path('txt_to-pdf',views.txtToPdf,name='txt'),
+    
+    
     
     
     

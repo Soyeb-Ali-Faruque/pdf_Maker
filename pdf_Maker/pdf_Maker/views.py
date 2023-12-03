@@ -1,25 +1,30 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect,get_object_or_404
 from django.http import HttpResponse
 from django.contrib import messages
 
 #used for login system
 from django.contrib.auth.hashers import make_password, check_password
-from userData.models import userdata
+from userData.models import userdata,UserFile
 from django.core.mail import send_mail
 import random
 
 
-#used for photo to pdf generation
-from reportlab.lib.pagesizes import A4
+#used for different file to pdf generation
 from reportlab.pdfgen import canvas
-import io
+from io import BytesIO
 
 
 def home(request):
-    user_id=request.session.get('user_id')
-    user_information=userdata.objects.get(pk=user_id)
-    
-    return render(request,'index.html',{'user':user_information})
+    user_id = request.session.get('user_id')
+    user_information=None
+    try:
+        user_information=userdata.objects.get(pk=user_id)
+        print(user_information)
+    except Exception:
+        
+        return render(request,'index.html')
+    return render(request,'index.html',{'user': user_information})
+  
 
 def loginto(request):
     message_password_updated=request.GET.get('passwordUpdated',False)
@@ -206,7 +211,45 @@ def delete_account(request):
     return render(request,'deleteAccount.html')
 
 #generate pdf
+def convertText_to_pdf(txt_content):
+    buffer = BytesIO()
+    pdf = canvas.Canvas(buffer)
+    pdf.drawString(100, 100, txt_content)
+    pdf.save()
+    buffer.seek(0)
+    return buffer
 
-def generate_pdf(request,file_type):
     
-    return render(request,'MakePDF.html')
+def txtToPdf(request):
+    user_id=request.session.get('user_id')
+    fileType="txt"
+    if request.method == 'POST':
+        txt_file = request.FILES.get('file')
+        print('yess')
+        
+
+        # Check if the uploaded file has a '.txt' extension
+        if txt_file and txt_file.name.lower().endswith('.txt'):
+            user_instance=userdata.objects.get(pk=user_id)
+            print('yess')
+            user_file = UserFile(user=user_instance,user_file=txt_file,)
+            user_file.save()
+
+            # Convert TXT content to PDF
+            print("File Content:", txt_file.read().decode('utf-8'))
+            txt_file.seek(0)
+            txt_content = txt_file.read().decode('utf-8')
+            print(txt_content,"hi")
+            pdf_response = convertText_to_pdf(txt_content)
+            print('yess')
+            # Save the generated PDF file in the UserFile model
+            user_file.pdf_file.save('output.pdf', pdf_response)
+
+            
+        else:
+            error_message = 'Please upload a valid text file (with .txt extension).'
+            return render(request, 'MakePDF.html',{'type':fileType,'isError':True,'message':error_message})
+    return render(request,'MakePDF.html',{'type':fileType})
+    
+
+
