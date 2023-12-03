@@ -244,6 +244,12 @@ def txtToPdf(request):
             print('yess')
             # Save the generated PDF file in the UserFile model
             user_file.pdf_file.save('output.pdf', pdf_response)
+            #return generated pdf to template
+            response = HttpResponse(content_type='application/pdf')
+            response['Content-Disposition'] = 'attachment; filename="output.pdf"'
+            response.write(pdf_response)
+
+            return response
 
             
         else:
