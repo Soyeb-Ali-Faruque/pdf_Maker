@@ -1,6 +1,7 @@
 from django.shortcuts import render,redirect,get_object_or_404
 from django.http import HttpResponse
 from django.contrib import messages
+from django.core.files.base import ContentFile
 
 #used for login system
 from django.contrib.auth.hashers import make_password, check_password
@@ -10,6 +11,7 @@ import random
 
 
 #used for different file to pdf generation
+from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from io import BytesIO
 
@@ -210,52 +212,66 @@ def delete_account(request):
             return render(request,'deleteAccount.html',{'userPassword':True})
     return render(request,'deleteAccount.html')
 
-#generate pdf
-def convertText_to_pdf(txt_content):
-    buffer = BytesIO()
-    pdf = canvas.Canvas(buffer)
-    pdf.drawString(100, 100, txt_content)
-    pdf.save()
-    buffer.seek(0)
-    return buffer
+#generate pdf from txt   
 
-    
 def txtToPdf(request):
-    user_id=request.session.get('user_id')
-    fileType="txt"
+    user_id = request.session.get('user_id')
+    fileType = "txt"
+
     if request.method == 'POST':
         txt_file = request.FILES.get('file')
-        print('yess')
-        
 
         # Check if the uploaded file has a '.txt' extension
         if txt_file and txt_file.name.lower().endswith('.txt'):
-            user_instance=userdata.objects.get(pk=user_id)
-            print('yess')
-            user_file = UserFile(user=user_instance,user_file=txt_file,)
+            user_instance = userdata.objects.get(pk=user_id)
+            user_file = UserFile(user=user_instance, user_file=txt_file)
             user_file.save()
 
-            # Convert TXT content to PDF
-            print("File Content:", txt_file.read().decode('utf-8'))
-            txt_file.seek(0)
+            # Convert TXT content to PDF using reportlab
             txt_content = txt_file.read().decode('utf-8')
-            print(txt_content,"hi")
             pdf_response = convertText_to_pdf(txt_content)
-            print('yess')
+
             # Save the generated PDF file in the UserFile model
-            user_file.pdf_file.save('output.pdf', pdf_response)
-            #return generated pdf to template
+            output_pdf_name = f'{txt_file.name.replace(".txt", "")}.pdf'
+            user_file.pdf_file.save(output_pdf_name, ContentFile(pdf_response))
+
+            # Return generated PDF to template for download
             response = HttpResponse(content_type='application/pdf')
-            response['Content-Disposition'] = 'attachment; filename="output.pdf"'
+            response['Content-Disposition'] = f'attachment; filename="{output_pdf_name}"'
             response.write(pdf_response)
 
             return response
-
-            
         else:
             error_message = 'Please upload a valid text file (with .txt extension).'
-            return render(request, 'MakePDF.html',{'type':fileType,'isError':True,'message':error_message})
-    return render(request,'MakePDF.html',{'type':fileType})
-    
+            return render(request, 'MakePDF.html', {'type': fileType, 'isError': True, 'message': error_message})
+
+    return render(request, 'MakePDF.html', {'type': fileType})
+
+def convertText_to_pdf(txt_content):
+    buffer = BytesIO()
+
+    # Create a PDF canvas
+    c = canvas.Canvas(buffer, pagesize=letter)
+    c.setFont("Courier", 12)
+
+    # Split text content into lines and write to PDF
+    lines = txt_content.split('\n')
+    y_offset = 800
+
+    for line in lines:
+        c.drawString(50, y_offset, line.strip())
+        y_offset -= 15
+
+        if y_offset < 50:
+            c.showPage()
+            c.setFont("Courier", 12)
+            y_offset = 800
+
+    c.save()
+
+    pdf = buffer.getvalue()
+    buffer.close()
+    return pdf
+
 
 
