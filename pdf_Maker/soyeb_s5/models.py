@@ -1,6 +1,8 @@
 from django.db import models
+
+# Create your models here.
 class Follow_Me(models.Model):
-    image = models.ImageField(upload_to='images/')
+    image = models.ImageField(upload_to='admin_content/', null=True, default=None)
     name = models.CharField(max_length=255)
     link = models.URLField()
     

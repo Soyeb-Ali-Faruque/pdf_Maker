@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'pdf_Maker',
     'userData',
+    'soyeb_s5',
     
     
 ]
