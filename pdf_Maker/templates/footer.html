@@ -14,17 +14,22 @@
         
         <div class="contact" style="display: block;">
             <h3>Contact Me</h3>
-            <p>Email: soyebali0101@gmail.com</p>
-            <p>Alternative email: sohebfaruque@gmail.com</p>
+            {% for contact in contactMe %}
+            <p>{{contact.contact_way}}: {{contact.contact_details}}</p>
+            {% endfor %}
+            
         </div>
         
         
         
         <div class="follow">
             <h3>Follow Me</h3>
-            <a href="#"><img src="/static/img/facebook-icon.png" alt="Facebook"/></a>
+            {% for follow in followMe %}
+            <a href="{{follow.link}}">
+                <img src="{{follow.image.url}}" alt="{{follow.name}}"/>
+            </a>
+            {% endfor %}
             
-            <a href="#"><img src="/static/img/instagram-icon.png" alt="Instagram"/></a>
         </div>
     </div>
     

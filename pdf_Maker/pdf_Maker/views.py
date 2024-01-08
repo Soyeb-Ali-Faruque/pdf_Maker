@@ -9,6 +9,11 @@ from userData.models import userdata,UserFile
 from django.core.mail import send_mail
 import random
 
+#used for admin content
+from soyeb_s5.models import Follow_Me,ContactInformation
+followMe=Follow_Me.objects.all()
+
+
 
 #used for different file to pdf generation
 from reportlab.lib.pagesizes import letter
@@ -17,15 +22,19 @@ from io import BytesIO
 
 
 def home(request):
+    
     user_id = request.session.get('user_id')
     user_information=None
+    data={'user':user_information,
+          'followMe':followMe}
+    
     try:
         user_information=userdata.objects.get(pk=user_id)
         print(user_information)
     except Exception:
         
-        return render(request,'index.html')
-    return render(request,'index.html',{'user': user_information})
+        return render(request,'index.html',data)
+    return render(request,'index.html',data)
   
 
 def loginto(request):
