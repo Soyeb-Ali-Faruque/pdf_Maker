@@ -273,7 +273,7 @@ def convertText_to_pdf(txt_content):
     buffer.close()
     return pdf
 
-#feedback
+#Feedback
 def feedback(request):
     if request.method == 'POST':
         name=request.POST.get('name')
@@ -288,4 +288,3 @@ def feedback(request):
         )
         return redirect('Home')
     return render(request,'feedback.html')
-
