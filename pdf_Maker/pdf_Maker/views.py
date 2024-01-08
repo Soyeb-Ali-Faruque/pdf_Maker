@@ -273,5 +273,19 @@ def convertText_to_pdf(txt_content):
     buffer.close()
     return pdf
 
-
+#feedback
+def feedback(request):
+    if request.method == 'POST':
+        name=request.POST.get('name')
+        feedback=request.POST.get('feedback')
+        send_mail(
+            'feedback',
+            'Name: {}\nfeedback: {}'.format(name,feedback),
+            'sohebfaruque@gmail.com',
+            ['soyebali0101@gmail.com'],
+            fail_silently=False
+            
+        )
+        return redirect('Home')
+    return render(request,'feedback.html')
 

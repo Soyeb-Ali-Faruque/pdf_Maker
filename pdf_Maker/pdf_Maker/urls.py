@@ -36,6 +36,8 @@ urlpatterns = [
     path('delete-account/',views.delete_account,name='Delete-account'),
     path('txt_to-pdf',views.txtToPdf,name='txt'),
     
+    path('feedback/',views.feedback,name="Feedback"),
+    
     
     
     
