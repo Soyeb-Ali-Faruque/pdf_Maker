@@ -221,7 +221,7 @@ def delete_account(request):
             return render(request,'deleteAccount.html',{'userPassword':True})
     return render(request,'deleteAccount.html')
 
-#generate pdf from txt   
+
 
 
 
