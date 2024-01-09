@@ -1,0 +1,77 @@
+[33mcommit 862ad5f87a9e4707b862df2e5225b0a9eddda8e4[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;32mdynamicLinks[m[33m)[m
+Author: Soyeb-Ali-Faruque <soyebali0101@gmail.com>
+Date:   Tue Jan 9 01:08:08 2024 +0530
+
+    dynamic link work is done now
+
+[33mcommit 69b3eb358ab0b7e1514623db4f477b111a7eaf88[m
+Author: Soyeb-Ali-Faruque <soyebali0101@gmail.com>
+Date:   Mon Jan 8 19:13:56 2024 +0530
+
+    created one app name soyeb_s5 and two models for dynamic content
+
+[33mcommit 75c7c9e3df04aec7f86109a114664569aabea0fd[m
+Author: Soyeb-Ali-Faruque <soyebali0101@gmail.com>
+Date:   Mon Jan 8 18:47:04 2024 +0530
+
+    two admin site models
+
+[33mcommit 3620cd341c754183677e1152d1a0f865fa09a83b[m
+Author: Soyeb-Ali-Faruque <soyebali0101@gmail.com>
+Date:   Mon Jan 8 15:39:03 2024 +0530
+
+    view code update
+
+[33mcommit 2684964e8388540e27c8aaaa9d9517d40335c0b9[m
+Author: Soyeb-Ali-Faruque <soyebali0101@gmail.com>
+Date:   Mon Jan 8 15:28:16 2024 +0530
+
+    feedback developed
+
+[33mcommit a25e6cc85cb5fb4f683a849dd4cf2d216ec02f39[m[33m ([m[1;32mprofile[m[33m, [m[1;32mpdf[m[33m, [m[1;32mhistory[m[33m)[m
+Author: Soyeb-Ali-Faruque <soyebali0101@gmail.com>
+Date:   Sun Jan 7 19:20:15 2024 +0530
+
+    update for creating more braches for specific part of the project
+
+[33mcommit e5d8937385f1e41aa5e6daed29a3455dcd3a5ea7[m[33m ([m[1;31morigin/main[m[33m)[m
+Author: Soyeb-Ali-Faruque <soyebali0101@gmail.com>
+Date:   Mon Dec 4 01:45:32 2023 +0530
+
+    updated version again
+
+[33mcommit 2d82a62a6459efe3697aeafb9dfd592114cad0e8[m
+Author: Soyeb-Ali-Faruque <soyebali0101@gmail.com>
+Date:   Sun Dec 3 23:52:09 2023 +0530
+
+    updated version
+
+[33mcommit 18f20c383c97cbfc38565eca7140eed99f8de34a[m
+Author: Soyeb-Ali-Faruque <soyebali0101@gmail.com>
+Date:   Mon Nov 20 04:03:02 2023 +0530
+
+    update
+
+[33mcommit 6f41b5d2b7e435c00fe2c53e252ca1d6a60869bb[m
+Author: Soyeb-Ali-Faruque <soyebali0101@gmail.com>
+Date:   Mon Nov 20 02:15:15 2023 +0530
+
+    made some changes had removed files and modifications
+
+[33mcommit 46c4a5fc183b582f27b7118b5f230e5cf6c5be92[m
+Author: Soyeb-Ali-Faruque <soyebali0101@gmail.com>
+Date:   Wed Nov 15 20:08:57 2023 +0530
+
+    updated login system
+
+[33mcommit d44672f4f66cbb96587201680757db6862d09e14[m
+Author: Soyeb-Ali-Faruque <soyebali0101@gmail.com>
+Date:   Mon Oct 16 01:48:55 2023 +0530
+
+    First release of pdf maker
+
+[33mcommit b8d4d5f8d5bf16349017a1de467528a675d20737[m
+Author: Soyeb Ali Faruque <120319290+Soyeb-Ali-Faruque@users.noreply.github.com>
+Date:   Tue Sep 19 06:28:40 2023 +0530
+
+    Initial commit

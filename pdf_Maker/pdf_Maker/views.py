@@ -223,64 +223,7 @@ def delete_account(request):
 
 #generate pdf from txt   
 
-def txtToPdf(request):
-    user_id = request.session.get('user_id')
-    fileType = "txt"
 
-    if request.method == 'POST':
-        txt_file = request.FILES.get('file')
-
-        # Check if the uploaded file has a '.txt' extension
-        if txt_file and txt_file.name.lower().endswith('.txt'):
-            user_instance = userdata.objects.get(pk=user_id)
-            user_file = UserFile(user=user_instance, user_file=txt_file)
-            user_file.save()
-
-            # Convert TXT content to PDF using reportlab
-            txt_content = txt_file.read().decode('utf-8')
-            pdf_response = convertText_to_pdf(txt_content)
-
-            # Save the generated PDF file in the UserFile model
-            output_pdf_name = f'{txt_file.name.replace(".txt", "")}.pdf'
-            user_file.pdf_file.save(output_pdf_name, ContentFile(pdf_response))
-
-            # Return generated PDF to template for download
-            response = HttpResponse(content_type='application/pdf')
-            response['Content-Disposition'] = f'attachment; filename="{output_pdf_name}"'
-            response.write(pdf_response)
-
-            return response
-        else:
-            error_message = 'Please upload a valid text file (with .txt extension).'
-            return render(request, 'MakePDF.html', {'type': fileType, 'isError': True, 'message': error_message})
-
-    return render(request, 'MakePDF.html', {'type': fileType})
-
-def convertText_to_pdf(txt_content):
-    buffer = BytesIO()
-
-    # Create a PDF canvas
-    c = canvas.Canvas(buffer, pagesize=letter)
-    c.setFont("Courier", 12)
-
-    # Split text content into lines and write to PDF
-    lines = txt_content.split('\n')
-    y_offset = 800
-
-    for line in lines:
-        c.drawString(50, y_offset, line.strip())
-        y_offset -= 15
-
-        if y_offset < 50:
-            c.showPage()
-            c.setFont("Courier", 12)
-            y_offset = 800
-
-    c.save()
-
-    pdf = buffer.getvalue()
-    buffer.close()
-    return pdf
 
 #Feedback
 def feedback(request):
