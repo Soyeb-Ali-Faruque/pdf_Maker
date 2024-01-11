@@ -26,18 +26,38 @@
             </form>
         </div>
     </div>
+ 
+    
     <div class="user-details">
-        <div class="field" >
-            <label for="name">Name</label>
-            <div class="editable">{{user.name}}</div>
+        <div class="field">
+           
+          
+                <form method="post" action="" class="edit-form">
+                    {% csrf_token %}
+                    <div class="input-group mb-3">
+                    
+                    <input type="text" class="form-control" placeholder="{{user.name}}">
+                    <button class="btn btn-primary" type="button">Change your Name</button>
+                    </div>
+                </form>
         </div>
-        <div class="field" >
-            <label for="username">Username</label>
-            <div class="editable">{{user.userName}}</div>
+        
+        <div class="field">
+          
+           
+                <form method="post" action="" class="edit-form">
+                    {% csrf_token %}
+                    <div class="input-group mb-3">
+                    <input type="text" class="form-control" placeholder="{{user.userName}}">
+                    <button class="btn btn-primary" type="button">Change your username</button>
+                    </div>
+                </form>
+            
+            
         </div>
         <div class="field">
-            <label for="email">Email</label>
-            <div class="non-editable">{{user.email}}</div>
+            
+              
         </div>
         <a href="{% url 'Forget-password' %}" class="reset-password-link">Reset Password</a>
         <form method="post" action="{% url 'Delete-account' %}">

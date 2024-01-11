@@ -67,15 +67,9 @@ label {
     margin-bottom: 5px;
 }
 
-.editable {
-    display: inline-block;
-    border-bottom: 1px dashed #666;
-    cursor: pointer;
-}
 
-.non-editable {
-    display: inline-block;
-}
+
+
 
 .reset-password-link {
     color: blue; /* Change the color as needed */
