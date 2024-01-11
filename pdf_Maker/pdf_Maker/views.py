@@ -1,3 +1,5 @@
+import os
+from django.conf import settings
 from django.shortcuts import render,redirect,get_object_or_404
 from django.http import HttpResponse
 from django.contrib import messages
@@ -9,9 +11,9 @@ from userData.models import userdata,UserFile
 from django.core.mail import send_mail
 import random
 
-#used for admin content
-from soyeb_s5.models import Follow_Me,ContactInformation
-followMe=Follow_Me.objects.all()
+
+
+
 
 
 
@@ -193,6 +195,12 @@ def update_picture(request):
     user_id=request.session.get('user_id')
     user=userdata.objects.get(pk=user_id)
     if request.method=='POST':
+        if user.profile_picture:
+            
+            path_to_delete = os.path.join(settings.MEDIA_ROOT, str(user.profile_picture))
+            if os.path.exists(path_to_delete):
+                os.remove(path_to_delete)
+        
         picture=request.FILES.get('profile_picture')
         user.profile_picture=picture
         user.save()
@@ -203,8 +211,12 @@ def remove_picture(request):
     user_id=request.session.get('user_id')
     user=userdata.objects.get(pk=user_id)
     if request.method=='POST':
-        user.profile_picture=None
-        user.save()
+        if user.profile_picture:
+            path_to_delete = os.path.join(settings.MEDIA_ROOT, str(user.profile_picture))
+            if os.path.exists(path_to_delete):
+                os.remove(path_to_delete)
+            user.profile_picture=None
+            user.save()
     return redirect('Profile')
         
 def delete_account(request):
