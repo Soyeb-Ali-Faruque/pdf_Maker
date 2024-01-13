@@ -4,6 +4,8 @@ from django.shortcuts import render,redirect,get_object_or_404
 from django.http import HttpResponse
 from django.contrib import messages
 from django.core.files.base import ContentFile
+from django.contrib import messages
+from django.urls import reverse
 
 #used for login system
 from django.contrib.auth.hashers import make_password, check_password
@@ -182,11 +184,13 @@ def forget_otp(request):
 def profile(request):
     user_id=request.session.get('user_id')
     user_information=None
+    error=request.GET.get('errorOccurr',None)
+    print(error)
     
     if user_id:
         try:
             user_information=userdata.objects.get(pk=user_id)
-            return render(request,'profile.html',{'user':user_information})
+            return render(request,'profile.html',{'user':user_information,'error':error})
         except userdata.DoesNotExist:
             return redirect('Login')
     return render(request,'login.html')
@@ -218,7 +222,30 @@ def remove_picture(request):
             user.profile_picture=None
             user.save()
     return redirect('Profile')
-        
+def update_name(request):
+    user_id=request.session.get('user_id')
+    user=userdata.objects.get(pk=user_id)
+    if request.method == 'POST':
+        get_name=request.POST.get('name')
+        if len(get_name) < 5:
+            messages.error(request, 'Please enter atlease 5 characters.')
+    
+        else:
+            user.name=get_name
+            user.save()
+    return redirect(reverse('Profile') + f'?errorOccurr=name')
+def update_username(request):
+    user_id=request.session.get('user_id')
+    user=userdata.objects.get(pk=user_id)
+    if request.method == 'POST':
+        get_username=request.POST.get('username')
+        if len(get_username) < 5:
+            messages.error(request, 'Please enter atlease 5 characters.')
+    
+        else:
+            user.username=get_username
+            user.save()
+    return redirect(reverse('Profile') + f'?errorOccurr=username')   
 def delete_account(request):
     user_id=request.session.get('user_id')
     user=userdata.objects.get(pk=user_id)

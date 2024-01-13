@@ -33,6 +33,8 @@ urlpatterns = [
     path('user-profile/',views.profile,name='Profile'),
     path('profile-picture-update',views.update_picture,name='Update-picture'),
     path('profile-picture-remove',views.remove_picture,name='Remove-picture'),
+    path('update-name/',views.update_name,name='Update-name'),
+    path('update-username/',views.update_username,name='Update-username'),
     path('delete-account/',views.delete_account,name='Delete-account'),
     
     

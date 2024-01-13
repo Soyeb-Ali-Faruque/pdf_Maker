@@ -30,32 +30,56 @@
     
     <div class="user-details">
         <div class="field">
+            {% if error == 'name' %}
+            {% if messages %}
+            <ul class="messages">
+              {% for message in messages %}
+              <li {% if message.tags %} class="{{ message.tags }}"{% endif %} style="color: red;">{{ message }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+          {% endif %}
            
           
-                <form method="post" action="" class="edit-form">
+                <form method="post" action="{% url 'Update-name' %}" class="edit-form">
                     {% csrf_token %}
                     <div class="input-group mb-3">
                     
-                    <input type="text" class="form-control" placeholder="{{user.name}}">
-                    <button class="btn btn-primary" type="button">Change your Name</button>
+                    <input type="text" class="form-control" name='name' placeholder="{{user.name}}">
+                    <button class="btn btn-primary" type="submit">Change your Name</button>
                     </div>
                 </form>
         </div>
         
         <div class="field">
+            {% if error == 'username' %}
+            {% if messages %}
+  <ul class="messages">
+    {% for message in messages %}
+      <li {% if message.tags %} class="{{ message.tags }}"{% endif %} style="color: red;">{{ message }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
+{% endif %}
+
           
            
-                <form method="post" action="" class="edit-form">
+                <form method="post" action="{% url 'Update-username' %}" class="edit-form">
                     {% csrf_token %}
                     <div class="input-group mb-3">
-                    <input type="text" class="form-control" placeholder="{{user.userName}}">
-                    <button class="btn btn-primary" type="button">Change your username</button>
+                    <input type="text" class="form-control" name='username' placeholder="{{user.userName}}">
+                    <button class="btn btn-primary" type="submit">Change your username</button>
                     </div>
                 </form>
             
             
         </div>
         <div class="field">
+
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" value="{{ user.email }}" readonly>
+                <button class="btn btn-primary" type="button">@Email</button>
+            </div>
             
               
         </div>
