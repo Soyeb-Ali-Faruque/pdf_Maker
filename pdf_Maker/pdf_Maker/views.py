@@ -26,19 +26,7 @@ from io import BytesIO
 
 
 def home(request):
-    
-    user_id = request.session.get('user_id')
-    user_information=None
-    data={'user':user_information
-    }
-    
-    try:
-        user_information=userdata.objects.get(pk=user_id)
-        print(user_information)
-    except Exception:
-        
-        return render(request,'index.html',data)
-    return render(request,'index.html',data)
+    return render(request,'index.html')
   
 
 def loginto(request):
@@ -58,8 +46,8 @@ def loginto(request):
         if user is not None and check_password(password,user.password):
                 
             request.session['user_id'] = user.id
-            data={'user':user}
-            return render(request,'index.html',data)
+            
+            return redirect('Home')
         else:
                 
             return render(request,'login.html',{'error':True})
@@ -182,18 +170,7 @@ def forget_otp(request):
 
 #user profile
 def profile(request):
-    user_id=request.session.get('user_id')
-    user_information=None
-    error=request.GET.get('errorOccurr',None)
-    print(error)
     
-    if user_id:
-        try:
-            user_information=userdata.objects.get(pk=user_id)
-            return render(request,'profile.html',{'user':user_information,'error':error})
-        except userdata.DoesNotExist:
-            return redirect('Login')
-    return render(request,'login.html')
 
 def update_picture(request):
     user_id=request.session.get('user_id')
