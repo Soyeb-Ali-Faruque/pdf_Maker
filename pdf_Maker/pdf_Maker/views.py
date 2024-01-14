@@ -170,7 +170,9 @@ def forget_otp(request):
 
 #user profile
 def profile(request):
-    
+    error=request.GET.get('errorOccurr',None)
+    return render(request,'profile.html',{'error':error})
+
 
 def update_picture(request):
     user_id=request.session.get('user_id')

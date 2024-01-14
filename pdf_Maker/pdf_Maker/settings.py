@@ -69,6 +69,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'soyeb_s5.admin_contents.follow_me',
                 'soyeb_s5.admin_contents.contact_me',
+                'userData.userInfo.userInformation',
             ],
         },
     },
