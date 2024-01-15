@@ -66,6 +66,7 @@ def signup(request):
     if request.method =='POST':
         email=request.POST.get('uemail')
         #condition...
+        
         name=request.POST.get('uname')
         password=request.POST.get('upass')
        # password=make_password(sendPassword)
@@ -144,26 +145,31 @@ def otp(request):
 
 
 # forget password otp  generation
-forgetPassword={'otp':'',
-                'user_data':'',
-                'setpassword':''}
 def forgetpass(request):
     if request.method =='POST':
+        #get form data from template
         email=request.POST.get('email')
         password=request.POST.get('password')
         repassword=request.POST.get('repassword')
+        
+        
         try:
             user_data=userdata.objects.get(email=email)
         
             if password != repassword:
                 return render(request,'forgetpass.html',{'incorrectPassword':True,'email':email})
+        
+        #generate otp for verification
             otpValue=""
             for i in range(0,6):
                 otpValue+=str(random.randrange(0,9))
-            
-            forgetPassword['otp']=otpValue
-            forgetPassword['user_data']=user_data
-            forgetPassword['setpassword']=make_password(password)
+        
+            request.session['email']=email    
+            request.session['otp']=otpValue           
+            request.session['password']=make_password(password)          
+        
+        
+        #sending mail to the user
             send_mail(
                 'otp-reset your password','your otp is {}'.format(otpValue),
                 'sohebfaruque@gmail.com',[email],
@@ -176,12 +182,17 @@ def forgetpass(request):
 
 def forget_otp(request):
     if request.method == 'POST':
-        otp=request.POST.get('otp')
-        if otp == forgetPassword['otp']:
-            user=forgetPassword['user_data']
-            updated_password=forgetPassword['setpassword']
+        otp_from_user=request.POST.get('otp')
+        otp_Backend_storage=request.session.get('otp')
+        if otp_from_user == otp_Backend_storage:
+            email=request.session.get('email')
+            user=userdata.objects.get(email=email)
+            updated_password=request.session.get('password')
             user.password=updated_password
             user.save()
+            request.session.pop('otp')
+            request.session.pop('email')
+            request.session.pop('password')
             
             url='/login/?passwordUpdated=True'
             return redirect(url)
