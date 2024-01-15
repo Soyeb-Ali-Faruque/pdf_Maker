@@ -61,13 +61,14 @@ def logout(request):
 
 # this code is for sign up
 #------------------sign up-------------------------------#
-data_login={}
+
 def signup(request):
     if request.method =='POST':
         email=request.POST.get('uemail')
+        #condition...
         name=request.POST.get('uname')
-        sendPassword=request.POST.get('upass')
-        password=make_password(sendPassword)
+        password=request.POST.get('upass')
+       # password=make_password(sendPassword)
         
         #username creation
         username=""
@@ -76,38 +77,59 @@ def signup(request):
                 break
             username+=char
         
-        user=userdata(email=email,password=password,name=name,userName=username)
+        #
         otpValue=""
         for i in range(0,6):
             otpValue+=str(random.randrange(0,9))
+        
+        #session data storation
+        request.session['username']=username
+        request.session['password']=password
+        request.session['name']=name
+        request.session['email']=email
+        request.session['otp']=otpValue
+        
+       
+       #sending otp to the associated mail
         send_mail(
             'otp-verification','your otp is {}'.format(otpValue),
             'sohebfaruque@gmail.com',[email],
             fail_silently=False
         )
-        data_login['otp']=otpValue
-        data_login['user']=user
-        data_login['usermail']=email
-        data_login['username']=username
-        data_login['userPassword']=sendPassword
+       
         
-        return redirect('/otp-verification')
+        return redirect('Signup-otp')
     return render(request,'login.html')
 def otp(request):
+    name=request.session.get('name')
+    username=request.session.get('username')
+    password=make_password(request.session.get('password'))
+    email=request.session.get('email')
+    otp=request.session.get('otp')
+    
  
     if request.method =='POST':
         user_otp=request.POST.get('otp')
-        if user_otp == data_login['otp']:
-            user=data_login['user']
+        if user_otp == otp:
+            
+            user=userdata(email=email,password=password,name=name,userName=username)
             user.save()
-            try:
-                send_mail(
-                'your login credential','your username is {} and password is {}'.format(data_login['username'],data_login['userPassword']),
-                'sohebfaruque@gmail.com',[data_login[usermail]],
+           
+           
+           #sending username password
+            send_mail(
+                'your login credential','your username is {} and password is {}'.format(username,request.session.get('password')),
+                'sohebfaruque@gmail.com',[email],
                 fail_silently=False
                 )
-            except Exception:
-                pass
+            
+            #pop or remove information from session
+            request.session.pop('name',None)
+            request.session.pop('username',None)
+            request.session.pop('password',None)
+            request.session.pop('email',None)
+            request.session.pop('otp',None)
+            
             url='/login/?acc_created=True'
             return redirect(url)
 
