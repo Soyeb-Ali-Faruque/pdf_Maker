@@ -36,6 +36,8 @@ urlpatterns = [
     path('update-name/',views.update_name,name='Update-name'),
     path('update-username/',views.update_username,name='Update-username'),
     path('delete-account/',views.delete_account,name='Delete-account'),
+    path('text-to-pdf',views.textToPdf,name='Text-To-Pdf'),
+    path('image-to-pdf',views.imgToPdf,name='Image-To-Pdf'),
     
     
     path('feedback/',views.feedback,name="Feedback"),

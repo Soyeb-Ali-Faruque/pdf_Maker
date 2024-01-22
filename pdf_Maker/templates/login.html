@@ -37,6 +37,10 @@
         <div class="form-content">
           <div class="login-form">
             <div class="title">Login </div>
+            {% if error_alreadyAccountExist %}
+    <p>An account has already been made with this email.<br> <span style="color: red;">{{ email }}</span></p>
+{% endif %}
+
             {% if pass_updated %}your password updated successfully!
             login here{% endif %}
             {% if acc_created %}your account is Created successfully!

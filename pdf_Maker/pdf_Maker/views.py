@@ -65,7 +65,10 @@ def logout(request):
 def signup(request):
     if request.method =='POST':
         email=request.POST.get('uemail')
-        #condition...
+        #condition for checking if the account is already made by this email or not 
+        hasAccount=userdata.objects.filter(email=email).first()
+        if hasAccount is not None:
+            return render(request,'login.html',{'error_alreadyAccountExist':True,'email':email})
         
         name=request.POST.get('uname')
         password=request.POST.get('upass')
@@ -272,9 +275,63 @@ def delete_account(request):
             return render(request,'deleteAccount.html',{'userPassword':True})
     return render(request,'deleteAccount.html')
 
+#pdf generations from different file__________________-___________________
 
+# text to pdf
+def textToPdf(request):
+    if request.method == 'POST':
+        user_file=request.FILES.get('file')
+        if user_file:
+            # Set the file size limit (600 KB)
+            size_limit_kb = 600
+            size_limit_bytes = size_limit_kb * 1024
 
+            # Check the file size(in bytes)
+            if user_file.size > size_limit_bytes:
+                return render(request,'pdf.html',{'file_accept':'.txt','file_size_exceeded':True})
+           
+           
+            pdf_content = convert_txt_to_pdf(user_file)
 
+            # Send the PDF to the frontend for automatic downloading
+            response = HttpResponse(pdf_content, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{user_file.name.replace(".txt", ".pdf")}"'
+            return response
+    return render(request,'pdf.html',{'file_accept':'.txt'})
+
+def convert_txt_to_pdf(txt_file):
+    # Create a BytesIO buffer to store the PDF content
+    pdf_buffer = BytesIO()
+
+    # Create a PDF document using reportlab
+    pdf = canvas.Canvas(pdf_buffer)
+
+    # Read the content of the .txt file and write it to the PDF
+    with txt_file.open(mode='r') as txt_content:
+        y_position = 750  # Starting y-position
+        line_height = 12  # Adjust as needed
+        page_height = 800  # Adjust as needed
+
+        for line in txt_content:
+            pdf.drawString(100, y_position, line.strip())
+            y_position -= line_height  # Move to the next line
+            if y_position < 50:
+                    # Add a new page
+                    pdf.showPage()
+                    y_position = page_height
+
+    # Save the PDF content and close the PDF document
+    pdf.save()
+
+    # Set the buffer position to the beginning for reading
+    pdf_buffer.seek(0)
+
+    # Return the PDF content
+    return pdf_buffer.read()
+
+def imgToPdf(request):
+    return render(request,'pdf.html',{'file_accept':'.png, .jpg, .jpeg'})
+    
 
 #Feedback
 def feedback(request):
