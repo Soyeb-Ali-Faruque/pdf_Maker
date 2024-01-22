@@ -22,6 +22,7 @@ import random
 #used for different file to pdf generation
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+from PIL import Image
 from io import BytesIO
 
 
@@ -291,7 +292,7 @@ def textToPdf(request):
                 return render(request,'pdf.html',{'file_accept':'.txt','file_size_exceeded':True})
            
            
-            pdf_content = convert_txt_to_pdf(user_file)
+            pdf_content = convert_to_pdf(user_file)
 
             # Send the PDF to the frontend for automatic downloading
             response = HttpResponse(pdf_content, content_type='application/pdf')
@@ -299,27 +300,48 @@ def textToPdf(request):
             return response
     return render(request,'pdf.html',{'file_accept':'.txt'})
 
-def convert_txt_to_pdf(txt_file):
+
+
+def imgToPdf(request):
+    if request.method == 'POST':
+        user_file=request.FILES.get('file')
+        pdf_content = convert_to_pdf(user_file)
+
+        # Send the PDF to the frontend for automatic downloading
+        response = HttpResponse(pdf_content, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{user_file.name.replace(".jpg", ".pdf").replace(".jpeg", ".pdf").replace(".png", ".pdf")}"'
+        return response
+        
+    return render(request,'pdf.html',{'file_accept':'.png, .jpg, .jpeg'})
+    
+def convert_to_pdf(file):
     # Create a BytesIO buffer to store the PDF content
     pdf_buffer = BytesIO()
 
     # Create a PDF document using reportlab
     pdf = canvas.Canvas(pdf_buffer)
+    
+    if file.name.endswith('.txt'):
+        # Read the content of the .txt file and write it to the PDF
+        with txt_file.open(mode='r') as txt_content:
+            y_position = 750  # Starting y-position
+            line_height = 12  # Adjust as needed
+            page_height = 800  # Adjust as needed
 
-    # Read the content of the .txt file and write it to the PDF
-    with txt_file.open(mode='r') as txt_content:
-        y_position = 750  # Starting y-position
-        line_height = 12  # Adjust as needed
-        page_height = 800  # Adjust as needed
-
-        for line in txt_content:
-            pdf.drawString(100, y_position, line.strip())
-            y_position -= line_height  # Move to the next line
-            if y_position < 50:
+            for line in txt_content:
+                pdf.drawString(100, y_position, line.strip())
+                y_position -= line_height  # Move to the next line
+                if y_position < 50:
                     # Add a new page
                     pdf.showPage()
                     y_position = page_height
-
+    elif file.name.endswith(('.jpg', '.jpeg', '.png')):
+        # Handle image files
+        image = Image.open(file)
+        pdf.drawInlineImage(image, 0, 0, width=595.276, height=841.890)
+        
+    else:
+        pass
     # Save the PDF content and close the PDF document
     pdf.save()
 
@@ -328,11 +350,6 @@ def convert_txt_to_pdf(txt_file):
 
     # Return the PDF content
     return pdf_buffer.read()
-
-def imgToPdf(request):
-    return render(request,'pdf.html',{'file_accept':'.png, .jpg, .jpeg'})
-    
-
 #Feedback
 def feedback(request):
     if request.method == 'POST':
