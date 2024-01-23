@@ -12,10 +12,22 @@
     <div class="container">
         <h1>Document Conversion Options</h1>
         <div class="option">
-          <a href="{% url 'Text-To-Pdf' %}">TXT to PDF</a>
+          <a href="{% url 'Text-To-Pdf' %}">Text(.txt) to PDF</a>
         </div>
         <div class="option">
-          <a href="{% url 'Image-To-Pdf' %}">IMG to PDF</a>
+          <a href="{% url 'Image-To-Pdf' %}">Image(.png, .jpg, .jpeg) to PDF</a>
+        </div>
+        <div class="option">
+          <a href="{% url 'Word-To-Pdf' %}">Word(.docx, .doc) to PDF</a>
+        </div>
+        <div class="option">
+          <a href="{% url 'Powerpoint-To-Pdf' %}">PowerPoint(.pptx, .ppt) to PDF</a>
+        </div>
+        <div class="option">
+          <a href="{% url 'Excel-To-Pdf' %}">Excel(.xlsx, .xls) to PDF</a>
+        </div>
+        <div class="option">
+          <a href="{% url 'Compress-pdf' %}">COMPRESS YOUR PDF</a>
         </div>
         
     </div>

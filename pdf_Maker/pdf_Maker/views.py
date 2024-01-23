@@ -23,7 +23,13 @@ import random
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from PIL import Image
+from reportlab.lib.utils import ImageReader  
+from docx import Document
+from pptx import Presentation
+from openpyxl import load_workbook
 from io import BytesIO
+
+
 
 
 def home(request):
@@ -313,7 +319,44 @@ def imgToPdf(request):
         return response
         
     return render(request,'pdf.html',{'file_accept':'.png, .jpg, .jpeg'})
-    
+
+def wordToPdf(request):
+    if request.method == 'POST':
+        user_file=request.FILES.get('file')
+        pdf_content = convert_to_pdf(user_file)
+
+        # Send the PDF to the frontend for automatic downloading
+        response = HttpResponse(pdf_content, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{user_file.name.replace(".doc", ".pdf").replace(".docx", ".pdf")}"'
+        return response
+
+    return render(request,'pdf.html',{'file_accept':'.doc, .docx'})
+
+def powerpointToPdf(request):
+    if request.method == 'POST':
+        user_file=request.FILES.get('file')
+        pdf_content = convert_to_pdf(user_file)
+
+        # Send the PDF to the frontend for automatic downloading
+        response = HttpResponse(pdf_content, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{user_file.name.replace(".ppt", ".pdf").replace(".pptx", ".pdf")}"'
+        return response
+    return render(request,'pdf.html',{'file_accept':'.ppt, .pptx'}) 
+
+def excelToPdf(request):
+    if request.method == 'POST':
+        user_file=request.FILES.get('file')
+        pdf_content = convert_to_pdf(user_file)
+
+        # Send the PDF to the frontend for automatic downloading
+        response = HttpResponse(pdf_content, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{user_file.name.replace(".xls", ".pdf").replace(".xlsx", ".pdf")}"'
+        return response
+    return render(request,'pdf.html',{'file_accept':'.xls, .xlsx'})
+
+def compressPdf(request):
+    pass 
+  
 def convert_to_pdf(file):
     # Create a BytesIO buffer to store the PDF content
     pdf_buffer = BytesIO()
@@ -321,35 +364,72 @@ def convert_to_pdf(file):
     # Create a PDF document using reportlab
     pdf = canvas.Canvas(pdf_buffer)
     
+    y_position = 750 
+    line_height = 12  
+    page_height = 800 
+    
+    # text to PDF conversion
     if file.name.endswith('.txt'):
-        # Read the content of the .txt file and write it to the PDF
-        with txt_file.open(mode='r') as txt_content:
-            y_position = 750  # Starting y-position
-            line_height = 12  # Adjust as needed
-            page_height = 800  # Adjust as needed
-
+        with file.open(mode='r') as txt_content:
             for line in txt_content:
                 pdf.drawString(100, y_position, line.strip())
-                y_position -= line_height  # Move to the next line
+                y_position -= line_height
                 if y_position < 50:
-                    # Add a new page
                     pdf.showPage()
                     y_position = page_height
+    
+    # image to PDF conversion
     elif file.name.endswith(('.jpg', '.jpeg', '.png')):
-        # Handle image files
         image = Image.open(file)
-        pdf.drawInlineImage(image, 0, 0, width=595.276, height=841.890)
-        
-    else:
-        pass
+        image_reader = ImageReader(image)
+        pdf.drawImage(image_reader, 0, 0, width=595.276, height=841.890)
+    
+    # word to PDF conversion
+    elif file.name.endswith(('.doc', '.docx')):
+        doc = Document(file)
+        for paragraph in doc.paragraphs:
+            pdf.drawString(100, y_position, paragraph.text.strip())
+            y_position -= line_height
+            if y_position < 50:
+                pdf.showPage()
+                y_position = page_height
+                
+    
+    # powerpoint to PDF conversion
+    elif file.name.endswith(('.ppt', '.pptx')):
+        presentation = Presentation(file)
+        for slide_number, slide in enumerate(presentation.slides):
+            for shape in slide.shapes:
+                if shape.has_text_frame:
+                    pdf.drawString(100, y_position, shape.text.strip())
+                    y_position -= line_height
+                    if y_position < 50:
+                        y_position = page_height
+                        pdf.showPage()
+
+    # excel to PDF conversion
+    elif file.name.endswith(('.xls', '.xlsx')):
+        workbook = load_workbook(file)
+        for sheet_name in workbook.sheetnames:
+            sheet = workbook[sheet_name]
+            for row in sheet.iter_rows(values_only=True):
+                for cell_value in row:
+                    pdf.drawString(100, y_position, str(cell_value).strip())
+                    y_position -= line_height
+                    if y_position < 50:
+                        y_position = page_height
+                        pdf.showPage()
+
     # Save the PDF content and close the PDF document
     pdf.save()
 
     # Set the buffer position to the beginning for reading
     pdf_buffer.seek(0)
 
-    # Return the PDF content
+    # Return the filename for use in Content-Disposition header
     return pdf_buffer.read()
+
+   
 #Feedback
 def feedback(request):
     if request.method == 'POST':
