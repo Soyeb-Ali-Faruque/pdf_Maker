@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.core.files.base import ContentFile
 from django.contrib import messages
 from django.urls import reverse
+from django.core.files.storage import default_storage
 
 #used for login system
 from django.contrib.auth.hashers import make_password, check_password
@@ -25,6 +26,7 @@ from reportlab.pdfgen import canvas
 from PIL import Image
 from reportlab.lib.utils import ImageReader  
 from docx import Document
+from docx2pdf import convert
 from pptx import Presentation
 from openpyxl import load_workbook
 from io import BytesIO
@@ -104,8 +106,16 @@ def signup(request):
        #sending otp to the associated mail
         send_mail(
             'otp-verification','your otp is {}'.format(otpValue),
-            'sohebfaruque@gmail.com',[email],
+            settings.EMAIL_HOST_USER_1,[email],
             fail_silently=False
+            auth_user=settings.EMAIL_HOST_USER_1,
+            auth_password=settings.EMAIL_HOST_PASSWORD_1,
+            connection_kwargs={
+                'host': settings.EMAIL_HOST_1,
+                'port': settings.EMAIL_PORT_1,
+                'use_tls': settings.EMAIL_USE_TLS_1,
+            },
+            
         )
        
         
@@ -130,8 +140,16 @@ def otp(request):
            #sending username password
             send_mail(
                 'your login credential','your username is {} and password is {}'.format(username,request.session.get('password')),
-                'sohebfaruque@gmail.com',[email],
+                settings.EMAIL_HOST_USER_2,[email],
                 fail_silently=False
+                auth_user=settings.EMAIL_HOST_USER_2,
+                auth_password=settings.EMAIL_HOST_PASSWORD_2,
+                connection_kwargs={
+                    'host': settings.EMAIL_HOST_2,
+                    'port': settings.EMAIL_PORT_2,
+                    'use_tls': settings.EMAIL_USE_TLS_2,
+                },
+                
                 )
             
             #pop or remove information from session
@@ -182,8 +200,15 @@ def forgetpass(request):
         #sending mail to the user
             send_mail(
                 'otp-reset your password','your otp is {}'.format(otpValue),
-                'sohebfaruque@gmail.com',[email],
+                settings.EMAIL_HOST_USER_1,[email],
                 fail_silently=False
+                auth_user=settings.EMAIL_HOST_USER_1,
+                auth_password=settings.EMAIL_HOST_PASSWORD_1,
+                connection_kwargs={
+                     'host': settings.EMAIL_HOST_1,
+                    'port': settings.EMAIL_PORT_1,
+                     'use_tls': settings.EMAIL_USE_TLS_1,
+                 },
             )
             return redirect('/forget-password-OTP')
         except:
@@ -320,39 +345,42 @@ def imgToPdf(request):
         
     return render(request,'pdf.html',{'file_accept':'.png, .jpg, .jpeg'})
 
-def wordToPdf(request):
-    if request.method == 'POST':
-        user_file=request.FILES.get('file')
-        pdf_content = convert_to_pdf(user_file)
+# def wordToPdf(request):
+#     if request.method == 'POST':
+#         user_file=request.FILES.get('file')
+#         # pdf_content = convert_to_pdf(user_file)
+#         temp_file_path = os.path.join(default_storage.location, 'temp_file.docx')
+        
+#         pdf_file=convert(temp_file_path)
+#         os.remove(temp_file_path)
+#         # Send the PDF to the frontend for automatic downloading
+#         response = HttpResponse(pdf_file.read(), content_type='application/pdf')
+#         response['Content-Disposition'] = f'attachment; filename="{user_file.name.replace(".doc", ".pdf").replace(".docx", ".pdf")}"'
+#         return response
 
-        # Send the PDF to the frontend for automatic downloading
-        response = HttpResponse(pdf_content, content_type='application/pdf')
-        response['Content-Disposition'] = f'attachment; filename="{user_file.name.replace(".doc", ".pdf").replace(".docx", ".pdf")}"'
-        return response
+#     return render(request,'pdf.html',{'file_accept':'.doc, .docx'})
 
-    return render(request,'pdf.html',{'file_accept':'.doc, .docx'})
+# def powerpointToPdf(request):
+#     if request.method == 'POST':
+#         user_file=request.FILES.get('file')
+#         pdf_content = convert_to_pdf(user_file)
 
-def powerpointToPdf(request):
-    if request.method == 'POST':
-        user_file=request.FILES.get('file')
-        pdf_content = convert_to_pdf(user_file)
+#         # Send the PDF to the frontend for automatic downloading
+#         response = HttpResponse(pdf_content, content_type='application/pdf')
+#         response['Content-Disposition'] = f'attachment; filename="{user_file.name.replace(".ppt", ".pdf").replace(".pptx", ".pdf")}"'
+#         return response
+#     return render(request,'pdf.html',{'file_accept':'.ppt, .pptx'}) 
 
-        # Send the PDF to the frontend for automatic downloading
-        response = HttpResponse(pdf_content, content_type='application/pdf')
-        response['Content-Disposition'] = f'attachment; filename="{user_file.name.replace(".ppt", ".pdf").replace(".pptx", ".pdf")}"'
-        return response
-    return render(request,'pdf.html',{'file_accept':'.ppt, .pptx'}) 
+# def excelToPdf(request):
+#     if request.method == 'POST':
+#         user_file=request.FILES.get('file')
+#         pdf_content = convert_to_pdf(user_file)
 
-def excelToPdf(request):
-    if request.method == 'POST':
-        user_file=request.FILES.get('file')
-        pdf_content = convert_to_pdf(user_file)
-
-        # Send the PDF to the frontend for automatic downloading
-        response = HttpResponse(pdf_content, content_type='application/pdf')
-        response['Content-Disposition'] = f'attachment; filename="{user_file.name.replace(".xls", ".pdf").replace(".xlsx", ".pdf")}"'
-        return response
-    return render(request,'pdf.html',{'file_accept':'.xls, .xlsx'})
+#         # Send the PDF to the frontend for automatic downloading
+#         response = HttpResponse(pdf_content, content_type='application/pdf')
+#         response['Content-Disposition'] = f'attachment; filename="{user_file.name.replace(".xls", ".pdf").replace(".xlsx", ".pdf")}"'
+#         return response
+#     return render(request,'pdf.html',{'file_accept':'.xls, .xlsx'})
 
 def compressPdf(request):
     pass 
@@ -384,50 +412,51 @@ def convert_to_pdf(file):
         image_reader = ImageReader(image)
         pdf.drawImage(image_reader, 0, 0, width=595.276, height=841.890)
     
-    # word to PDF conversion
-    elif file.name.endswith(('.doc', '.docx')):
-        doc = Document(file)
-        for paragraph in doc.paragraphs:
-            pdf.drawString(100, y_position, paragraph.text.strip())
-            y_position -= line_height
-            if y_position < 50:
-                pdf.showPage()
-                y_position = page_height
+    # # word to PDF conversion
+    # elif file.name.endswith(('.doc', '.docx')):
+    #     doc = Document(file)
+    #     for paragraph in doc.paragraphs:
+    #         pdf.drawString(100, y_position, paragraph.text.strip())
+    #         y_position -= line_height
+    #         if y_position < 50:
+    #             pdf.showPage()
+    #             y_position = page_height
                 
     
-    # powerpoint to PDF conversion
-    elif file.name.endswith(('.ppt', '.pptx')):
-        presentation = Presentation(file)
-        for slide_number, slide in enumerate(presentation.slides):
-            for shape in slide.shapes:
-                if shape.has_text_frame:
-                    pdf.drawString(100, y_position, shape.text.strip())
-                    y_position -= line_height
-                    if y_position < 50:
-                        y_position = page_height
-                        pdf.showPage()
+    # # powerpoint to PDF conversion
+    # elif file.name.endswith(('.ppt', '.pptx')):
+    #     presentation = Presentation(file)
+    #     for slide_number, slide in enumerate(presentation.slides):
+    #         for shape in slide.shapes:
+    #             if shape.has_text_frame:
+    #                 pdf.drawString(100, y_position, shape.text.strip())
+    #                 y_position -= line_height
+    #                 if y_position < 50:
+    #                     y_position = page_height
+    #                     pdf.showPage()
 
-    # excel to PDF conversion
-    elif file.name.endswith(('.xls', '.xlsx')):
-        workbook = load_workbook(file)
-        for sheet_name in workbook.sheetnames:
-            sheet = workbook[sheet_name]
-            for row in sheet.iter_rows(values_only=True):
-                for cell_value in row:
-                    pdf.drawString(100, y_position, str(cell_value).strip())
-                    y_position -= line_height
-                    if y_position < 50:
-                        y_position = page_height
-                        pdf.showPage()
+    # # excel to PDF conversion
+    # elif file.name.endswith(('.xls', '.xlsx')):
+    #     workbook = load_workbook(file)
+    #     for sheet_name in workbook.sheetnames:
+    #         sheet = workbook[sheet_name]
+    #         for row in sheet.iter_rows(values_only=True):
+    #             for cell_value in row:
+    #                 pdf.drawString(100, y_position, str(cell_value).strip())
+    #                 y_position -= line_height
+    #                 if y_position < 50:
+    #                     y_position = page_height
+    #                     pdf.showPage()
 
     # Save the PDF content and close the PDF document
     pdf.save()
+    print(pdf)
 
     # Set the buffer position to the beginning for reading
     pdf_buffer.seek(0)
 
     # Return the filename for use in Content-Disposition header
-    return pdf_buffer.read()
+    return pdf_buffer
 
    
 #Feedback
@@ -436,11 +465,18 @@ def feedback(request):
         name=request.POST.get('name')
         feedback=request.POST.get('feedback')
         send_mail(
-            'feedback',
+            'PDF MAKER-feedback',
             'Name: {}\nfeedback: {}'.format(name,feedback),
-            'sohebfaruque@gmail.com',
+            settings.EMAIL_HOST_USER_2,
             ['soyebali0101@gmail.com'],
             fail_silently=False
+            auth_user=settings.EMAIL_HOST_USER_2,
+            auth_password=settings.EMAIL_HOST_PASSWORD_2,
+            connection_kwargs={
+              'host': settings.EMAIL_HOST_2,
+              'port': settings.EMAIL_PORT_2,
+              'use_tls': settings.EMAIL_USE_TLS_2,
+        },
             
         )
         return redirect('Home')

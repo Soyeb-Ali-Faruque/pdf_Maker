@@ -38,10 +38,10 @@ urlpatterns = [
     path('delete-account/',views.delete_account,name='Delete-account'),
     path('text-to-pdf',views.textToPdf,name='Text-To-Pdf'),
     path('image-to-pdf',views.imgToPdf,name='Image-To-Pdf'),
-    path('word-to-pdf',views.wordToPdf,name='Word-To-Pdf'),
-    path('powerpoint-to-pdf',views.powerpointToPdf,name='Powerpoint-To-Pdf'),
-    path('excel-to-pdf',views.excelToPdf,name='Excel-To-Pdf'),
-    path('compress-pdf',views.compressPdf,name='Compress-pdf'),
+    # path('word-to-pdf',views.wordToPdf,name='Word-To-Pdf'),
+    # path('powerpoint-to-pdf',views.powerpointToPdf,name='Powerpoint-To-Pdf'),
+    # path('excel-to-pdf',views.excelToPdf,name='Excel-To-Pdf'),
+    path('compress-pdf',views.compressPdf,name='Compress-pdf'), 
     path('feedback/',views.feedback,name="Feedback"),
     
     
