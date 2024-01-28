@@ -10,7 +10,7 @@ from django.urls import reverse
 #used for login system
 from django.contrib.auth.hashers import make_password, check_password
 from userData.models import userdata,UserFile
-from django.core.mail import send_mail
+from django.core.mail import send_mail,EmailMessage, get_connection
 import random
 
 
@@ -22,8 +22,13 @@ import random
 #used for different file to pdf generation
 from io import BytesIO
 from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
 from PIL import Image
-from reportlab.lib.utils import ImageReader  
+from reportlab.lib.utils import ImageReader
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import SimpleDocTemplate, Paragraph
+from reportlab.pdfbase import pdfmetrics  # For registering fonts
+from reportlab.pdfbase.ttfonts import TTFont  # For TrueType fonts  
 # from docx import Document
 # from docx2pdf import convert
 # from pptx import Presentation
@@ -103,32 +108,14 @@ def signup(request):
         
        
        #sending otp to the associated mail
-        print(0)
-        send_mail(
-            
-            'otp-verification',
-            
-            'your otp is {}'.format(otpValue),
-            
-            settings.EMAIL_HOST_USER_1,[email],
-            
-            fail_silently=False,
-            
-            auth_user=settings.EMAIL_HOST_USER_1,
-            
-            auth_password=settings.EMAIL_HOST_PASSWORD_1,
-            
-            # connection_kwargs={
-                
-            #     'host': settings.EMAIL_HOST_1,
-                
-            #     'port': settings.EMAIL_PORT_1,
-                
-            #     'use_tls': settings.EMAIL_USE_TLS_1,
-            # },
-            
+        email_message = EmailMessage(
+           'otp-verification',
+            'Your OTP is {}'.format(otpValue),
+            'otp.automailer@gmail.com',
+            [email],
+            connection=get_connection(settings.EMAIL_BACKEND_1),
         )
-        print(1)
+        email_message.send(fail_silently=False)
        
         
         return redirect('Signup-otp')
@@ -357,42 +344,7 @@ def imgToPdf(request):
         
     return render(request,'pdf.html',{'file_accept':'.png, .jpg, .jpeg'})
 
-# def wordToPdf(request):
-#     if request.method == 'POST':
-#         user_file=request.FILES.get('file')
-#         # pdf_content = convert_to_pdf(user_file)
-#         temp_file_path = os.path.join(default_storage.location, 'temp_file.docx')
-        
-#         pdf_file=convert(temp_file_path)
-#         os.remove(temp_file_path)
-#         # Send the PDF to the frontend for automatic downloading
-#         response = HttpResponse(pdf_file.read(), content_type='application/pdf')
-#         response['Content-Disposition'] = f'attachment; filename="{user_file.name.replace(".doc", ".pdf").replace(".docx", ".pdf")}"'
-#         return response
 
-#     return render(request,'pdf.html',{'file_accept':'.doc, .docx'})
-
-# def powerpointToPdf(request):
-#     if request.method == 'POST':
-#         user_file=request.FILES.get('file')
-#         pdf_content = convert_to_pdf(user_file)
-
-#         # Send the PDF to the frontend for automatic downloading
-#         response = HttpResponse(pdf_content, content_type='application/pdf')
-#         response['Content-Disposition'] = f'attachment; filename="{user_file.name.replace(".ppt", ".pdf").replace(".pptx", ".pdf")}"'
-#         return response
-#     return render(request,'pdf.html',{'file_accept':'.ppt, .pptx'}) 
-
-# def excelToPdf(request):
-#     if request.method == 'POST':
-#         user_file=request.FILES.get('file')
-#         pdf_content = convert_to_pdf(user_file)
-
-#         # Send the PDF to the frontend for automatic downloading
-#         response = HttpResponse(pdf_content, content_type='application/pdf')
-#         response['Content-Disposition'] = f'attachment; filename="{user_file.name.replace(".xls", ".pdf").replace(".xlsx", ".pdf")}"'
-#         return response
-#     return render(request,'pdf.html',{'file_accept':'.xls, .xlsx'})
 
 def compressPdf(request):
     pass 
@@ -402,67 +354,46 @@ def convert_to_pdf(file):
     pdf_buffer = BytesIO()
 
     # Create a PDF document using reportlab
-    pdf = canvas.Canvas(pdf_buffer)
+    pdf = SimpleDocTemplate(pdf_buffer, pagesize=letter)
+    # canvas.Canvas(pdf_buffer)
+    
+    styles = getSampleStyleSheet()
+    
+    story = []
     
     y_position = 750 
     line_height = 12  
     page_height = 800 
+    x_position = 100  # Initial x-coordinate
+    
+    # pdfmetrics.registerFont(TTFont('Courier', 'cour.ttf'))
+    # pdf.setFont('Courier', 10)
     
     # text to PDF conversion
     if file.name.endswith('.txt'):
         with file.open(mode='r') as txt_content:
             for line in txt_content:
-                pdf.drawString(100, y_position, line.strip())
-                y_position -= line_height
-                if y_position < 50:
-                    pdf.showPage()
-                    y_position = page_height
+                story.append(Paragraph(line, styles['Normal']))
+                # text_object = pdf.beginText(x_position, y_position)
+                # text_object.setFont('Courier', 10)
+                # text_object.textLine(line.rstrip())  # Use rstrip to remove trailing whitespace
+                # pdf.drawText(text_object)
+                # y_position -= line_height
+                # if y_position < 50:
+                #     pdf.showPage()
+                #     y_position = page_height
     
     # image to PDF conversion
     elif file.name.endswith(('.jpg', '.jpeg', '.png')):
         image = Image.open(file)
         image_reader = ImageReader(image)
-        pdf.drawImage(image_reader, 0, 0, width=595.276, height=841.890)
+        # pdf.drawImage(image_reader, 0, 0, width=595.276, height=841.890)
+        story.append(image_reader)
     
-    # # word to PDF conversion
-    # elif file.name.endswith(('.doc', '.docx')):
-    #     doc = Document(file)
-    #     for paragraph in doc.paragraphs:
-    #         pdf.drawString(100, y_position, paragraph.text.strip())
-    #         y_position -= line_height
-    #         if y_position < 50:
-    #             pdf.showPage()
-    #             y_position = page_height
-                
+
     
-    # # powerpoint to PDF conversion
-    # elif file.name.endswith(('.ppt', '.pptx')):
-    #     presentation = Presentation(file)
-    #     for slide_number, slide in enumerate(presentation.slides):
-    #         for shape in slide.shapes:
-    #             if shape.has_text_frame:
-    #                 pdf.drawString(100, y_position, shape.text.strip())
-    #                 y_position -= line_height
-    #                 if y_position < 50:
-    #                     y_position = page_height
-    #                     pdf.showPage()
-
-    # # excel to PDF conversion
-    # elif file.name.endswith(('.xls', '.xlsx')):
-    #     workbook = load_workbook(file)
-    #     for sheet_name in workbook.sheetnames:
-    #         sheet = workbook[sheet_name]
-    #         for row in sheet.iter_rows(values_only=True):
-    #             for cell_value in row:
-    #                 pdf.drawString(100, y_position, str(cell_value).strip())
-    #                 y_position -= line_height
-    #                 if y_position < 50:
-    #                     y_position = page_height
-    #                     pdf.showPage()
-
-    # Save the PDF content and close the PDF document
-    pdf.save()
-    print(pdf)
+    pdf.build(story)
+    
 
     # Set the buffer position to the beginning for reading
     pdf_buffer.seek(0)

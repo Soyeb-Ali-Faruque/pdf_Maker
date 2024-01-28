@@ -132,18 +132,20 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 STATICFILES_DIRS=[BASE_DIR,'static']
 
 #email configuration for otp
+EMAIL_BACKEND_1 = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST_1='smtp.gmail.com'
 EMAIL_PORT_1=587
 EMAIL_HOST_USER_1='otp.automailer@gmail.com'
-EMAIL_HOST_PASSWORD_1='pezw bvzt lbss mqye'
+EMAIL_HOST_PASSWORD_1='pezw bvzt lbss mqye'.strip()
 EMAIL_USE_TLS_1=True
 
 
 #  email configuration for login credential and feedback
-EMAIL_HOST_2 = 'smtp.example.com'
+EMAIL_BACKEND_2 = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST_2 = 'smtp.gmail.com'
 EMAIL_PORT_2 = 587
 EMAIL_HOST_USER_2 = 's5tech.credentials@gmail.com'
-EMAIL_HOST_PASSWORD_2 = 'nwbz bmah vvpl lmte'
+EMAIL_HOST_PASSWORD_2 = 'nwbz bmah vvpl lmte'.strip()
 EMAIL_USE_TLS_2 = True
 #media
 MEDIA_ROOT=BASE_DIR/"media"
