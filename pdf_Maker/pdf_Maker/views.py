@@ -103,20 +103,32 @@ def signup(request):
         
        
        #sending otp to the associated mail
+        print(0)
         send_mail(
+            
             'otp-verification',
+            
             'your otp is {}'.format(otpValue),
+            
             settings.EMAIL_HOST_USER_1,[email],
+            
             fail_silently=False,
-            # auth_user=settings.EMAIL_HOST_USER_1,
-            # auth_password=settings.EMAIL_HOST_PASSWORD_1,
+            
+            auth_user=settings.EMAIL_HOST_USER_1,
+            
+            auth_password=settings.EMAIL_HOST_PASSWORD_1,
+            
             # connection_kwargs={
+                
             #     'host': settings.EMAIL_HOST_1,
+                
             #     'port': settings.EMAIL_PORT_1,
+                
             #     'use_tls': settings.EMAIL_USE_TLS_1,
             # },
             
         )
+        print(1)
        
         
         return redirect('Signup-otp')
