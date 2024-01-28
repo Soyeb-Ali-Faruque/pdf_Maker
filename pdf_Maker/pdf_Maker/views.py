@@ -1,12 +1,11 @@
 import os
 from django.conf import settings
-from django.shortcuts import render,redirect,get_object_or_404
+from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from django.contrib import messages
-from django.core.files.base import ContentFile
 from django.contrib import messages
 from django.urls import reverse
-from django.core.files.storage import default_storage
+
 
 #used for login system
 from django.contrib.auth.hashers import make_password, check_password
@@ -21,15 +20,15 @@ import random
 
 
 #used for different file to pdf generation
-from reportlab.lib.pagesizes import letter
+from io import BytesIO
 from reportlab.pdfgen import canvas
 from PIL import Image
 from reportlab.lib.utils import ImageReader  
-from docx import Document
-from docx2pdf import convert
-from pptx import Presentation
-from openpyxl import load_workbook
-from io import BytesIO
+# from docx import Document
+# from docx2pdf import convert
+# from pptx import Presentation
+# from openpyxl import load_workbook
+
 
 
 
@@ -105,16 +104,17 @@ def signup(request):
        
        #sending otp to the associated mail
         send_mail(
-            'otp-verification','your otp is {}'.format(otpValue),
+            'otp-verification',
+            'your otp is {}'.format(otpValue),
             settings.EMAIL_HOST_USER_1,[email],
-            fail_silently=False
-            auth_user=settings.EMAIL_HOST_USER_1,
-            auth_password=settings.EMAIL_HOST_PASSWORD_1,
-            connection_kwargs={
-                'host': settings.EMAIL_HOST_1,
-                'port': settings.EMAIL_PORT_1,
-                'use_tls': settings.EMAIL_USE_TLS_1,
-            },
+            fail_silently=False,
+            # auth_user=settings.EMAIL_HOST_USER_1,
+            # auth_password=settings.EMAIL_HOST_PASSWORD_1,
+            # connection_kwargs={
+            #     'host': settings.EMAIL_HOST_1,
+            #     'port': settings.EMAIL_PORT_1,
+            #     'use_tls': settings.EMAIL_USE_TLS_1,
+            # },
             
         )
        
@@ -141,7 +141,7 @@ def otp(request):
             send_mail(
                 'your login credential','your username is {} and password is {}'.format(username,request.session.get('password')),
                 settings.EMAIL_HOST_USER_2,[email],
-                fail_silently=False
+                fail_silently=False,
                 auth_user=settings.EMAIL_HOST_USER_2,
                 auth_password=settings.EMAIL_HOST_PASSWORD_2,
                 connection_kwargs={
@@ -201,7 +201,7 @@ def forgetpass(request):
             send_mail(
                 'otp-reset your password','your otp is {}'.format(otpValue),
                 settings.EMAIL_HOST_USER_1,[email],
-                fail_silently=False
+                fail_silently=False,
                 auth_user=settings.EMAIL_HOST_USER_1,
                 auth_password=settings.EMAIL_HOST_PASSWORD_1,
                 connection_kwargs={
@@ -469,7 +469,7 @@ def feedback(request):
             'Name: {}\nfeedback: {}'.format(name,feedback),
             settings.EMAIL_HOST_USER_2,
             ['soyebali0101@gmail.com'],
-            fail_silently=False
+            fail_silently=False,
             auth_user=settings.EMAIL_HOST_USER_2,
             auth_password=settings.EMAIL_HOST_PASSWORD_2,
             connection_kwargs={
