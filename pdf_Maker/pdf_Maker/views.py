@@ -332,7 +332,7 @@ def textToPdf(request):
 def imgToPdf(request):
     if request.method == 'POST':
         user_file=request.FILES.get('file')
-        pdf_content = convert_to_pdf(user_file)
+        pdf_content = convert_image_to_pdf(user_file)
 
         # Send the PDF to the frontend for automatic downloading
         response = HttpResponse(pdf_content, content_type='application/pdf')
@@ -367,7 +367,16 @@ def convert_text_to_pdf(file):
     return pdf_buffer
 
 def convert_image_to_pdf(file):
-    pass
+    pdf_buffer = BytesIO()
+     # Create a PDF document using reportlab
+    pdf = canvas.Canvas(pdf_buffer)
+    image = Image.open(file)
+    image_reader = ImageReader(image)
+    pdf.drawImage(image_reader, 0, 0, width=595.276, height=841.890)
+    pdf.save()
+    # Set the buffer position to the beginning for reading
+    pdf_buffer.seek(0)
+    return pdf_buffer.read()
    
 #Feedback
 def feedback(request):
