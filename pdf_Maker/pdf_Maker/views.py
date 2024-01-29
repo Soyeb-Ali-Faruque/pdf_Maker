@@ -20,19 +20,16 @@ import random
 
 
 #used for different file to pdf generation
+from reportlab.lib import utils
 from io import BytesIO
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from PIL import Image
 from reportlab.lib.utils import ImageReader
 from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.platypus import SimpleDocTemplate, Paragraph
-from reportlab.pdfbase import pdfmetrics  # For registering fonts
-from reportlab.pdfbase.ttfonts import TTFont  # For TrueType fonts  
-# from docx import Document
-# from docx2pdf import convert
-# from pptx import Presentation
-# from openpyxl import load_workbook
+from reportlab.platypus import SimpleDocTemplate, Paragraph,  Image as PlatypusImage
+
+
 
 
 
@@ -322,7 +319,7 @@ def textToPdf(request):
                 return render(request,'pdf.html',{'file_accept':'.txt','file_size_exceeded':True})
            
            
-            pdf_content = convert_to_pdf(user_file)
+            pdf_content = convert_text_to_pdf(user_file)
 
             # Send the PDF to the frontend for automatic downloading
             response = HttpResponse(pdf_content, content_type='application/pdf')
@@ -349,58 +346,28 @@ def imgToPdf(request):
 def compressPdf(request):
     pass 
   
-def convert_to_pdf(file):
+def convert_text_to_pdf(file):
     # Create a BytesIO buffer to store the PDF content
     pdf_buffer = BytesIO()
 
     # Create a PDF document using reportlab
-    pdf = SimpleDocTemplate(pdf_buffer, pagesize=letter)
-    # canvas.Canvas(pdf_buffer)
-    
-    styles = getSampleStyleSheet()
-    
+    pdf = SimpleDocTemplate(pdf_buffer, pagesize=letter)    
+    styles = getSampleStyleSheet()    
     story = []
-    
-    y_position = 750 
-    line_height = 12  
-    page_height = 800 
-    x_position = 100  # Initial x-coordinate
-    
-    # pdfmetrics.registerFont(TTFont('Courier', 'cour.ttf'))
-    # pdf.setFont('Courier', 10)
     
     # text to PDF conversion
     if file.name.endswith('.txt'):
         with file.open(mode='r') as txt_content:
             for line in txt_content:
-                story.append(Paragraph(line, styles['Normal']))
-                # text_object = pdf.beginText(x_position, y_position)
-                # text_object.setFont('Courier', 10)
-                # text_object.textLine(line.rstrip())  # Use rstrip to remove trailing whitespace
-                # pdf.drawText(text_object)
-                # y_position -= line_height
-                # if y_position < 50:
-                #     pdf.showPage()
-                #     y_position = page_height
-    
-    # image to PDF conversion
-    elif file.name.endswith(('.jpg', '.jpeg', '.png')):
-        image = Image.open(file)
-        image_reader = ImageReader(image)
-        # pdf.drawImage(image_reader, 0, 0, width=595.276, height=841.890)
-        story.append(image_reader)
-    
-
-    
+                story.append(Paragraph(line, styles['Normal']))       
     pdf.build(story)
-    
-
     # Set the buffer position to the beginning for reading
     pdf_buffer.seek(0)
-
     # Return the filename for use in Content-Disposition header
     return pdf_buffer
 
+def convert_image_to_pdf(file):
+    pass
    
 #Feedback
 def feedback(request):
