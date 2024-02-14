@@ -105,14 +105,13 @@ def signup(request):
         
        
        #sending otp to the associated mail
-        email_message = EmailMessage(
-           'otp-verification',
-            'Your OTP is {}'.format(otpValue),
-            'otp.automailer@gmail.com',
-            [email],
-            connection=get_connection(settings.EMAIL_BACKEND_1),
+        send_mail(
+            'otp-verification','your otp is {}'.format(otpValue),
+            'otp.automailer@gmail.com',[email],
+            backend='otp',
+            fail_silently=False
         )
-        email_message.send(fail_silently=False)
+
        
         
         return redirect('Signup-otp')
@@ -136,16 +135,8 @@ def otp(request):
            #sending username password
             send_mail(
                 'your login credential','your username is {} and password is {}'.format(username,request.session.get('password')),
-                settings.EMAIL_HOST_USER_2,[email],
-                fail_silently=False,
-                auth_user=settings.EMAIL_HOST_USER_2,
-                auth_password=settings.EMAIL_HOST_PASSWORD_2,
-                connection_kwargs={
-                    'host': settings.EMAIL_HOST_2,
-                    'port': settings.EMAIL_PORT_2,
-                    'use_tls': settings.EMAIL_USE_TLS_2,
-                },
-                
+                's5tech.credentials@gmail.com',[email],
+                fail_silently=False
                 )
             
             #pop or remove information from session
@@ -193,19 +184,14 @@ def forgetpass(request):
             request.session['password']=make_password(password)          
         
         
-        #sending mail to the user
+            #sending mail to the user
             send_mail(
                 'otp-reset your password','your otp is {}'.format(otpValue),
-                settings.EMAIL_HOST_USER_1,[email],
-                fail_silently=False,
-                auth_user=settings.EMAIL_HOST_USER_1,
-                auth_password=settings.EMAIL_HOST_PASSWORD_1,
-                connection_kwargs={
-                     'host': settings.EMAIL_HOST_1,
-                    'port': settings.EMAIL_PORT_1,
-                     'use_tls': settings.EMAIL_USE_TLS_1,
-                 },
+                'otp.automailer@gmail.com',[email],
+                backend='otp',
+                fail_silently=False
             )
+           
             return redirect('/forget-password-OTP')
         except:
             return render(request,'forgetpass.html',{'wrongEmail':True})
@@ -387,20 +373,6 @@ def feedback(request):
     if request.method == 'POST':
         name=request.POST.get('name')
         feedback=request.POST.get('feedback')
-        send_mail(
-            'PDF MAKER-feedback',
-            'Name: {}\nfeedback: {}'.format(name,feedback),
-            settings.EMAIL_HOST_USER_2,
-            ['soyebali0101@gmail.com'],
-            fail_silently=False,
-            auth_user=settings.EMAIL_HOST_USER_2,
-            auth_password=settings.EMAIL_HOST_PASSWORD_2,
-            connection_kwargs={
-              'host': settings.EMAIL_HOST_2,
-              'port': settings.EMAIL_PORT_2,
-              'use_tls': settings.EMAIL_USE_TLS_2,
-        },
-            
-        )
+        
         return redirect('Home')
     return render(request,'feedback.html')
