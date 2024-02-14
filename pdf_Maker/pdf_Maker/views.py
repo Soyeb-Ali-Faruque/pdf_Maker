@@ -326,9 +326,6 @@ def textToPdf(request):
             response['Content-Disposition'] = f'attachment; filename="{user_file.name.replace(".txt", ".pdf")}"'
             return response
     return render(request,'pdf.html',{'file_accept':'.txt'})
-
-
-
 def imgToPdf(request):
     if request.method == 'POST':
         user_file=request.FILES.get('file')
@@ -340,12 +337,11 @@ def imgToPdf(request):
         return response
         
     return render(request,'pdf.html',{'file_accept':'.png, .jpg, .jpeg'})
-
-
-
+def compressImage(request):
+    return render(request,'CompressFILE.html',{'file_type':'.png, .jpg, .jpeg'})
 def compressPdf(request):
-    pass 
-  
+    return render(request,'CompressFILE.html',{'file_type':'.pdf'})
+ 
 def convert_text_to_pdf(file):
     # Create a BytesIO buffer to store the PDF content
     pdf_buffer = BytesIO()
@@ -372,12 +368,20 @@ def convert_image_to_pdf(file):
     pdf = canvas.Canvas(pdf_buffer)
     image = Image.open(file)
     image_reader = ImageReader(image)
-    pdf.drawImage(image_reader, 0, 0, width=595.276, height=841.890)
+    width, height = image.size
+    if width > height:
+        pdf.setPageSize((width, height))
+        pdf.drawImage(image_reader, 0, 0, width, height)
+    else:
+        pdf.setPageSize(letter)
+        pdf.drawImage(image_reader, 0, 0,width=595.276, height=841.890)
+    
+    
     pdf.save()
     # Set the buffer position to the beginning for reading
     pdf_buffer.seek(0)
     return pdf_buffer.read()
-   
+  
 #Feedback
 def feedback(request):
     if request.method == 'POST':
