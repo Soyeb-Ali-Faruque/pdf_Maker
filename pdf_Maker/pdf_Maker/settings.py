@@ -133,7 +133,7 @@ STATICFILES_DIRS=[BASE_DIR,'static']
 EMAIL_HOST='smtp.gmail.com'
 EMAIL_PORT=587
 EMAIL_HOST_USER='sohebfaruque@gmail.com'
-EMAIL_HOST_PASSWORD='doprxiabwrseeprz'
+EMAIL_HOST_PASSWORD='zzkj wact ytuh aail'
 EMAIL_USE_TLS=True
 
 #media
