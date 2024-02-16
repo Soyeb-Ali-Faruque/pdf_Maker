@@ -10,7 +10,7 @@ from django.urls import reverse
 #used for login system
 from django.contrib.auth.hashers import make_password, check_password
 from userData.models import userdata,UserFile
-from django.core.mail import send_mail,EmailMessage, get_connection
+from django.core.mail import send_mail
 import random
 
 
@@ -107,9 +107,10 @@ def signup(request):
        #sending otp to the associated mail
         send_mail(
             'otp-verification','your otp is {}'.format(otpValue),
-            'otp.automailer@gmail.com',[email],
-            backend='otp',
-            fail_silently=False
+            's5tech.credentials@gmail.com',[email],
+             fail_silently=False,
+            
+             
         )
 
        

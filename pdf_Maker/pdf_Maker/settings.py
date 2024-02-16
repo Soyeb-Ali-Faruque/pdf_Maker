@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'pdf_Maker',
     'userData',
     'soyeb_s5',
+    'django_multi_mail_backend',
     
     
 ]
@@ -131,20 +132,51 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 STATICFILES_DIRS=[BASE_DIR,'static']
 
-EMAIL_BACKENDS = {
-    'default': {
-        'EMAIL_HOST': 'smtp.gmail.com',
-        'EMAIL_PORT': 587,
-        'EMAIL_USE_TLS': True,
-        'EMAIL_HOST_USER': 's5tech.credentials@gmail.com',
-        'EMAIL_HOST_PASSWORD': 'nwbz bmah vvpl lmte',
-    },
-    'otp': {
-        'EMAIL_HOST': 'smtp.gmail.com',
-        'EMAIL_PORT': 587,
-        'EMAIL_USE_TLS': True,
-        'EMAIL_HOST_USER': 'otp.automailer@gmail.com',
-        'EMAIL_HOST_PASSWORD': 'pezw bvzt lbss mqye',
-    }
-}
+# Example using MultiSMTPBackend
+# EMAIL_BACKEND = 'django_multi_mail_backend.backend.MultiSMTPBackend'
+
+# EMAIL_BACKENDS = {
+#     'default': {
+#         'BACKEND': 'django.core.mail.backends.smtp.EmailBackend',
+#         'HOST': 'smtp.gmail.com',
+#         'PORT': 587,
+#         'USERNAME': 's5tech.credentials@gmail.com',
+#         'PASSWORD': 'nwbz bmah vvpl lmte',
+#         'USE_TLS': True,
+#     },
+#     'otp': {
+#         'BACKEND': 'django.core.mail.backends.smtp.EmailBackend',
+#         'HOST': 'smtp.gmail.com',
+#         'PORT': 587,
+#         'USERNAME': 'otp.automailer@gmail.com',
+#         'PASSWORD': 'pezw bvzt lbss mqye',
+#         'USE_TLS': True,
+#     },
+# }
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+# # Configuration for the default email backend
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 's5tech.credentials@gmail.com'
+EMAIL_HOST_PASSWORD = 'nwbz bmah vvpl lmte'
+
+
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = 'sohebfaruque@gmail.com'
+# EMAIL_HOST_PASSWORD = 'fzhp omug qbhz ghkz'
+
+
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = 'otp.automailer@gmail.com'
+# EMAIL_HOST_PASSWORD = 'pryco rysx mjzz ashg'
+
+
 
