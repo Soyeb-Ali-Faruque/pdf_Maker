@@ -396,25 +396,3 @@ def compressPdf(request):
  
  
   
-#Feedback
-def feedback(request):
-    if request.method == 'POST':
-        name=request.POST.get('name')
-        feedback=request.POST.get('feedback')
-        send_mail(
-            'PDF MAKER-feedback',
-            'Name: {}\nfeedback: {}'.format(name,feedback),
-            settings.EMAIL_HOST_USER_2,
-            ['soyebali0101@gmail.com'],
-            fail_silently=False,
-            auth_user=settings.EMAIL_HOST_USER_2,
-            auth_password=settings.EMAIL_HOST_PASSWORD_2,
-            connection_kwargs={
-              'host': settings.EMAIL_HOST_2,
-              'port': settings.EMAIL_PORT_2,
-              'use_tls': settings.EMAIL_USE_TLS_2,
-        },
-            
-        )
-        return redirect('Home')
-    return render(request,'feedback.html')
