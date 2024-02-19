@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container mt-5">
-    <h2 class="text-center mb-4">Feedback Page</h2>
+    <h2 class="text-center mb-4" style="margin: 500px;">Feedback Page</h2>
     <form  method="post">
         {% csrf_token %}
         <div class="mb-3">
@@ -9,8 +9,39 @@
             <input type="text" id="name" name="name" class="form-control" required>
         </div>
         <div class="mb-3">
-            <label for="feedback" class="form-label">Feedback:</label>
-            <textarea id="feedback" name="feedback" rows="4" class="form-control" required></textarea>
+            <label for="email" class="form-label">Email:</label>
+            <input type="email" id="email" name="email" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Feedback Type:</label><br>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="feedbackType" id="featureRequest" value="featureRequest" required>
+                <label class="form-check-label" for="featureRequest">Feature Request</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="feedbackType" id="bugReport" value="bugReport" required>
+                <label class="form-check-label" for="bugReport">Bug Report</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="feedbackType" id="uxFeedback" value="uxFeedback" required>
+                <label class="form-check-label" for="uxFeedback">User Experience (UX) Feedback</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="feedbackType" id="performanceFeedback" value="performanceFeedback" required>
+                <label class="form-check-label" for="performanceFeedback">Performance Feedback</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="feedbackType" id="generalFeedback" value="generalFeedback" required>
+                <label class="form-check-label" for="generalFeedback">General Comments or Suggestions</label>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label for="subject" class="form-label">Subject:</label>
+            <input type="text" id="subject" name="subject" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label for="message" class="form-label">Message:</label>
+            <textarea id="message" name="message" rows="4" class="form-control" required></textarea>
         </div>
         <button type="submit" class="btn btn-primary">Submit Feedback</button>
     </form>

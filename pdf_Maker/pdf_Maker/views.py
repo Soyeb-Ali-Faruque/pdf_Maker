@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.urls import reverse
 
 
-#used for login system
+
 from django.contrib.auth.hashers import make_password, check_password
 from userData.models import userdata,UserFile
 from django.core.mail import send_mail
@@ -107,12 +107,10 @@ def signup(request):
        #sending otp to the associated mail
         send_mail(
             'otp-verification','your otp is {}'.format(otpValue),
-            's5tech.credentials@gmail.com',[email],
+            '',[email],
              fail_silently=False,
-            
-             
-        )
-
+          )
+        
        
         
         return redirect('Signup-otp')
@@ -136,7 +134,7 @@ def otp(request):
            #sending username password
             send_mail(
                 'your login credential','your username is {} and password is {}'.format(username,request.session.get('password')),
-                's5tech.credentials@gmail.com',[email],
+                '',[email],
                 fail_silently=False
                 )
             
@@ -188,7 +186,7 @@ def forgetpass(request):
             #sending mail to the user
             send_mail(
                 'otp-reset your password','your otp is {}'.format(otpValue),
-                'otp.automailer@gmail.com',[email],
+                '',[email],
                 backend='otp',
                 fail_silently=False
             )
