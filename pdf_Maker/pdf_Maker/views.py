@@ -326,21 +326,7 @@ def textToPdf(request):
             response['Content-Disposition'] = f'attachment; filename="{user_file.name.replace(".txt", ".pdf")}"'
             return response
     return render(request,'pdf.html',{'file_accept':'.txt'})
-def imgToPdf(request):
-    if request.method == 'POST':
-        user_file=request.FILES.get('file')
-        pdf_content = convert_image_to_pdf(user_file)
 
-        # Send the PDF to the frontend for automatic downloading
-        response = HttpResponse(pdf_content, content_type='application/pdf')
-        response['Content-Disposition'] = f'attachment; filename="{user_file.name.replace(".jpg", ".pdf").replace(".jpeg", ".pdf").replace(".png", ".pdf")}"'
-        return response
-        
-    return render(request,'pdf.html',{'file_accept':'.png, .jpg, .jpeg'})
-def compressImage(request):
-    return render(request,'CompressFILE.html',{'file_type':'.png, .jpg, .jpeg'})
-def compressPdf(request):
-    return render(request,'CompressFILE.html',{'file_type':'.pdf'})
  
 def convert_text_to_pdf(file):
     # Create a BytesIO buffer to store the PDF content
@@ -362,6 +348,22 @@ def convert_text_to_pdf(file):
     # Return the filename for use in Content-Disposition header
     return pdf_buffer
 
+
+
+
+#Image to pdf
+def imgToPdf(request):
+    if request.method == 'POST':
+        user_file=request.FILES.get('file')
+        pdf_content = convert_image_to_pdf(user_file)
+
+        # Send the PDF to the frontend for automatic downloading
+        response = HttpResponse(pdf_content, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{user_file.name.replace(".jpg", ".pdf").replace(".jpeg", ".pdf").replace(".png", ".pdf")}"'
+        return response
+        
+    return render(request,'pdf.html',{'file_accept':'.png, .jpg, .jpeg'})
+
 def convert_image_to_pdf(file):
     pdf_buffer = BytesIO()
      # Create a PDF document using reportlab
@@ -381,6 +383,18 @@ def convert_image_to_pdf(file):
     # Set the buffer position to the beginning for reading
     pdf_buffer.seek(0)
     return pdf_buffer.read()
+
+
+
+# Compress Files
+def compressImage(request):
+    return render(request,'CompressFILE.html',{'file_type':'.png, .jpg, .jpeg'})
+def compressPdf(request):
+    return render(request,'CompressFILE.html',{'file_type':'.pdf'})
+
+ 
+ 
+ 
   
 #Feedback
 def feedback(request):
