@@ -3,24 +3,24 @@ from django.conf import settings
 from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from django.contrib import messages
-from django.contrib import messages
 from django.urls import reverse
 
 
-#used for login system
+#login system dependencies
 from django.contrib.auth.hashers import make_password, check_password
-from userData.models import userdata,UserFile
-from django.core.mail import send_mail,EmailMessage, get_connection
+
+from django.core.mail import send_mail
 import random
 
 
-
+#MODELS
+from userData.models import userdata,UserFile
 
 
 
 
 #used for different file to pdf generation
-from reportlab.lib import utils
+
 from io import BytesIO
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
@@ -29,7 +29,7 @@ from reportlab.lib.utils import ImageReader
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate, Paragraph,  Image as PlatypusImage
 
-
+from PyPDF2 import PdfFileReader, PdfFileWriter
 
 
 
@@ -388,9 +388,80 @@ def convert_image_to_pdf(file):
 
 # Compress Files
 def compressImage(request):
+    if request.method == 'POST' and request.FILES.get('image'):
+        image_file = request.FILES['image']
+        target_size_kb = int(request.POST.get('target_size_kb', 300))  # Default to 300 KB if not provided
+        
+        # Call the function for compression
+        compressed_img = compress_image(image_file, target_size_kb)
+        
+        # Prepare response
+        response = HttpResponse(compressed_img.getvalue(), content_type='image/jpeg')
+        response['Content-Disposition'] = 'attachment; filename="compressed_image.jpg"'
+        return response
+
     return render(request,'CompressFILE.html',{'file_type':'.png, .jpg, .jpeg'})
+def compress_image(file, target_size_kb=300):
+    img = Image.open(file)
+    original_size = img.size[0] * img.size[1] * 3  # Assuming RGB image, 3 bytes per pixel
+
+    # Initialize quality parameter
+    quality = 95  # Starting quality value
+
+    # Compress the image until target size is reached
+    while True:
+        # Compress the image
+        compressed_img = BytesIO()
+        img.save(compressed_img, format='JPEG', quality=quality)
+
+        # Get the size of the compressed image
+        compressed_size = len(compressed_img.getvalue())
+
+        # Check if the compressed size is within the target range
+        if compressed_size <= target_size_kb * 1024:
+            break  # If compressed size is within target, break the loop
+        else:
+            # Reduce quality for further compression
+            quality -= 5  # Adjust the step size as needed
+
+            # Check if quality becomes too low
+            if quality <= 0:
+                # Compression quality too low, break the loop
+                break
+
+    return compressed_img
+
+
+
 def compressPdf(request):
+    if request.method == 'POST' and request.FILES.get('pdf_file'):
+        pdf_file = request.FILES['pdf_file']
+        
+        # Call the function for compression
+        compressed_pdf = compress_pdf(pdf_file)
+        
+        # Prepare response
+        response = HttpResponse(compressed_pdf.getvalue(), content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="compressed_pdf.pdf"'
+        return response
     return render(request,'CompressFILE.html',{'file_type':'.pdf'})
+
+def compress_pdf(file):
+    pdf_reader = PdfFileReader(file)
+    pdf_writer = PdfFileWriter()
+
+    # Compress each page of the PDF
+    for page_num in range(pdf_reader.numPages):
+        page = pdf_reader.getPage(page_num)
+        page.compressContentStreams()  # Compress content streams
+        pdf_writer.addPage(page)
+
+    # Prepare the compressed PDF in memory
+    compressed_pdf = BytesIO()
+    pdf_writer.write(compressed_pdf)
+    compressed_pdf.seek(0)
+
+    return compressed_pdf
 
  
  
