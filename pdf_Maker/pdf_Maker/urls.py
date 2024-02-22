@@ -40,7 +40,7 @@ urlpatterns = [
     path('image-to-pdf',views.imgToPdf,name='Image-To-Pdf'),
     path('compress-image',views.compressImage,name='Compress-image'), 
     path('compress-pdf',views.compressPdf,name='Compress-pdf'), 
-    # path('feedback/',views.feedback,name="Feedback"),
+    path('feedback/',views.feedback,name="Feedback"),
     
     
     

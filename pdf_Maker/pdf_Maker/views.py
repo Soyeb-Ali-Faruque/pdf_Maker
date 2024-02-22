@@ -388,9 +388,11 @@ def convert_image_to_pdf(file):
 
 # Compress Files
 def compressImage(request):
-    if request.method == 'POST' and request.FILES.get('image'):
-        image_file = request.FILES['image']
-        target_size_kb = int(request.POST.get('target_size_kb', 300))  # Default to 300 KB if not provided
+    if request.method == 'POST':
+        image_file = request.FILES.get('file')
+        print("Image file:", image_file.name)  # Debugging
+        target_size_kb = int(request.POST.get('target_size_kb', 25)) 
+        print("Target size:", target_size_kb)  
         
         # Call the function for compression
         compressed_img = compress_image(image_file, target_size_kb)
@@ -400,42 +402,52 @@ def compressImage(request):
         response['Content-Disposition'] = 'attachment; filename="compressed_image.jpg"'
         return response
 
-    return render(request,'CompressFILE.html',{'file_type':'.png, .jpg, .jpeg'})
+    return render(request, 'CompressFILE.html', {'file_type': '.png, .jpg, .jpeg'})
+
+ 
+
 def compress_image(file, target_size_kb=300):
     img = Image.open(file)
-    original_size = img.size[0] * img.size[1] * 3  # Assuming RGB image, 3 bytes per pixel
-
-    # Initialize quality parameter
-    quality = 95  # Starting quality value
-
-    # Compress the image until target size is reached
+    original_size = img.size[0] * img.size[1] * 3  
+    
+    
+    # Initialize quality parameters
+    min_quality = 0
+    max_quality = 100
+    quality = (min_quality + max_quality) // 2 
+    
+    # Compress the image using binary search
     while True:
         # Compress the image
         compressed_img = BytesIO()
         img.save(compressed_img, format='JPEG', quality=quality)
-
+        
         # Get the size of the compressed image
         compressed_size = len(compressed_img.getvalue())
-
+        
+        
         # Check if the compressed size is within the target range
         if compressed_size <= target_size_kb * 1024:
             break  # If compressed size is within target, break the loop
         else:
-            # Reduce quality for further compression
-            quality -= 5  # Adjust the step size as needed
-
-            # Check if quality becomes too low
-            if quality <= 0:
+            # Adjust quality based on binary search
+            if compressed_size > target_size_kb * 1024:
+                max_quality = quality - 1
+            else:
+                min_quality = quality + 1
+            
+            # Check if quality becomes too low or too high
+            if min_quality > max_quality:
                 # Compression quality too low, break the loop
                 break
-
+            
+            # Update quality for next iteration
+            quality = (min_quality + max_quality) // 2
+    
     return compressed_img
-
-
-
 def compressPdf(request):
     if request.method == 'POST' and request.FILES.get('pdf_file'):
-        pdf_file = request.FILES['pdf_file']
+        pdf_file = request.FILES['file']
         
         # Call the function for compression
         compressed_pdf = compress_pdf(pdf_file)
@@ -463,7 +475,21 @@ def compress_pdf(file):
 
     return compressed_pdf
 
- 
+ #Feedback
+def feedback(request):
+    if request.method == 'POST':
+        name=request.POST.get('name')
+        feedback=request.POST.get('feedback')
+        send_mail(
+            'feedback',
+            'Name: {}\nfeedback: {}'.format(name,feedback),
+            'sohebfaruque@gmail.com',
+            ['soyebali0101@gmail.com'],
+            fail_silently=False
+            
+        )
+        return redirect('Home')
+    return render(request,'feedback.html')
  
  
   
