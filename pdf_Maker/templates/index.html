@@ -12,11 +12,17 @@
     <div class="container">
         <h1>Document Conversion Options</h1>
         <div class="option">
-          <a href="">TXT to PDF</a>
+          <a href="{% url 'Text-To-Pdf' %}">Text(.txt) to PDF</a>
         </div>
         <div class="option">
-          <a href="">IMG to PDF</a>
+          <a href="{% url 'Image-To-Pdf' %}">Image(.png, .jpg, .jpeg) to PDF</a>
         </div>
+        <div class="option">
+          <a href="{% url 'Compress-image' %}">COMPRESS YOUR IMAGE FILES</a>
+        </div> 
+        <div class="option">
+          <a href="{% url 'Compress-pdf' %}">COMPRESS YOUR PDF FILES</a>
+        </div> 
         
     </div>
 

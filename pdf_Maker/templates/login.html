@@ -37,6 +37,10 @@
         <div class="form-content">
           <div class="login-form">
             <div class="title">Login </div>
+            {% if error_alreadyAccountExist %}
+    <p>An account has already been made with this email.<br> <span style="color: red;">{{ email }}</span></p>
+{% endif %}
+
             {% if pass_updated %}your password updated successfully!
             login here{% endif %}
             {% if acc_created %}your account is Created successfully!
@@ -55,7 +59,7 @@
                 <i class="fas fa-lock"></i>
                 <input type="password" placeholder="Enter your password" name="pass" required>
               </div>
-              <div class="text"><a href="/forget-password">Forgot password?</a></div>
+              <div class="text"><a href="{% url 'Forget-password' %}">Forgot password?</a></div>
               <div class="button input-box">
                 <input type="submit" value="Sumbit">
               </div>

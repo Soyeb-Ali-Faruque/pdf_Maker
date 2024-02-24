@@ -1,13 +1,13 @@
 import os
 from django.conf import settings
-from django.shortcuts import render,redirect,get_object_or_404
+from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from django.contrib import messages
-from django.core.files.base import ContentFile
 from django.contrib import messages
 from django.urls import reverse
 
-#used for login system
+
+
 from django.contrib.auth.hashers import make_password, check_password
 from userData.models import userdata,UserFile
 from django.core.mail import send_mail
@@ -20,9 +20,19 @@ import random
 
 
 #used for different file to pdf generation
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
+from reportlab.lib import utils
 from io import BytesIO
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from PIL import Image
+from reportlab.lib.utils import ImageReader
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import SimpleDocTemplate, Paragraph,  Image as PlatypusImage
+
+
+
+
+
 
 
 def home(request):
@@ -65,7 +75,10 @@ def logout(request):
 def signup(request):
     if request.method =='POST':
         email=request.POST.get('uemail')
-        #condition...
+        #condition for checking if the account is already made by this email or not 
+        hasAccount=userdata.objects.filter(email=email).first()
+        if hasAccount is not None:
+            return render(request,'login.html',{'error_alreadyAccountExist':True,'email':email})
         
         name=request.POST.get('uname')
         password=request.POST.get('upass')
@@ -94,9 +107,10 @@ def signup(request):
        #sending otp to the associated mail
         send_mail(
             'otp-verification','your otp is {}'.format(otpValue),
-            'sohebfaruque@gmail.com',[email],
-            fail_silently=False
-        )
+            's5tech.sendmail@gmail.com',[email],
+             fail_silently=False,
+          )
+        
        
         
         return redirect('Signup-otp')
@@ -120,7 +134,7 @@ def otp(request):
            #sending username password
             send_mail(
                 'your login credential','your username is {} and password is {}'.format(username,request.session.get('password')),
-                'sohebfaruque@gmail.com',[email],
+                's5tech.sendmail@gmail.com',[email],
                 fail_silently=False
                 )
             
@@ -146,39 +160,47 @@ def otp(request):
 
 # forget password otp  generation
 def forgetpass(request):
-    if request.method =='POST':
-        #get form data from template
-        email=request.POST.get('email')
-        password=request.POST.get('password')
-        repassword=request.POST.get('repassword')
-        
-        
+    if request.method == 'POST':
+        # Get form data from the template
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        repassword = request.POST.get('repassword')
+
         try:
-            user_data=userdata.objects.get(email=email)
-        
+            # Attempt to retrieve user data based on the provided email
+            user_data = userdata.objects.get(email=email)
+            print(user_data.email)  # Debug print to check if the user data is retrieved correctly
+
+            # Check if passwords match
             if password != repassword:
-                return render(request,'forgetpass.html',{'incorrectPassword':True,'email':email})
-        
-        #generate otp for verification
-            otpValue=""
-            for i in range(0,6):
-                otpValue+=str(random.randrange(0,9))
-        
-            request.session['email']=email    
-            request.session['otp']=otpValue           
-            request.session['password']=make_password(password)          
-        
-        
-        #sending mail to the user
+                return render(request, 'forgetpass.html', {'incorrectPassword': True, 'email': email})
+
+            # Generate OTP for verification
+            otpValue = ""
+            for i in range(0, 6):
+                otpValue += str(random.randrange(0, 9))
+
+            # Store data in session for further verification
+            request.session['email'] = email
+            request.session['otp'] = otpValue
+            request.session['password'] = make_password(password)
+
+            # Sending mail to the user
             send_mail(
-                'otp-reset your password','your otp is {}'.format(otpValue),
-                'sohebfaruque@gmail.com',[email],
+                'otp-reset your password', 'your otp is {}'.format(otpValue),
+                's5tech.sendmail@gmail.com', [email],
                 fail_silently=False
             )
+
+            # Redirect to OTP verification page
             return redirect('/forget-password-OTP')
-        except:
-            return render(request,'forgetpass.html',{'wrongEmail':True})
-    return render(request,'forgetpass.html')
+        except userdata.DoesNotExist:
+            # User data doesn't exist for the provided email
+            return render(request, 'forgetpass.html', {'wrongEmail': True})
+
+    # Render the forgetpass.html template for GET requests
+    return render(request, 'forgetpass.html')
+
 
 def forget_otp(request):
     if request.method == 'POST':
@@ -272,22 +294,107 @@ def delete_account(request):
             return render(request,'deleteAccount.html',{'userPassword':True})
     return render(request,'deleteAccount.html')
 
+#pdf generations from different file__________________-___________________
 
+# text to pdf
+def textToPdf(request):
+    if request.method == 'POST':
+        user_file=request.FILES.get('file')
+        if user_file:
+            # Set the file size limit (600 KB)
+            size_limit_kb = 600
+            size_limit_bytes = size_limit_kb * 1024
 
+            # Check the file size(in bytes)
+            if user_file.size > size_limit_bytes:
+                return render(request,'pdf.html',{'file_accept':'.txt','file_size_exceeded':True})
+           
+           
+            pdf_content = convert_text_to_pdf(user_file)
 
+            # Send the PDF to the frontend for automatic downloading
+            response = HttpResponse(pdf_content, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{user_file.name.replace(".txt", ".pdf")}"'
+            return response
+    return render(request,'pdf.html',{'file_accept':'.txt'})
+def imgToPdf(request):
+    if request.method == 'POST':
+        user_file=request.FILES.get('file')
+        pdf_content = convert_image_to_pdf(user_file)
 
+        # Send the PDF to the frontend for automatic downloading
+        response = HttpResponse(pdf_content, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{user_file.name.replace(".jpg", ".pdf").replace(".jpeg", ".pdf").replace(".png", ".pdf")}"'
+        return response
+        
+    return render(request,'pdf.html',{'file_accept':'.png, .jpg, .jpeg'})
+def compressImage(request):
+    return render(request,'CompressFILE.html',{'file_type':'.png, .jpg, .jpeg'})
+def compressPdf(request):
+    return render(request,'CompressFILE.html',{'file_type':'.pdf'})
+ 
+def convert_text_to_pdf(file):
+    # Create a BytesIO buffer to store the PDF content
+    pdf_buffer = BytesIO()
+
+    # Create a PDF document using reportlab
+    pdf = SimpleDocTemplate(pdf_buffer, pagesize=letter)    
+    styles = getSampleStyleSheet()    
+    story = []
+    
+    # text to PDF conversion
+    if file.name.endswith('.txt'):
+        with file.open(mode='r') as txt_content:
+            for line in txt_content:
+                story.append(Paragraph(line, styles['Normal']))       
+    pdf.build(story)
+    # Set the buffer position to the beginning for reading
+    pdf_buffer.seek(0)
+    # Return the filename for use in Content-Disposition header
+    return pdf_buffer
+
+def convert_image_to_pdf(file):
+    pdf_buffer = BytesIO()
+     # Create a PDF document using reportlab
+    pdf = canvas.Canvas(pdf_buffer)
+    image = Image.open(file)
+    image_reader = ImageReader(image)
+    width, height = image.size
+    if width > height:
+        pdf.setPageSize((width, height))
+        pdf.drawImage(image_reader, 0, 0, width, height)
+    else:
+        pdf.setPageSize(letter)
+        pdf.drawImage(image_reader, 0, 0,width=595.276, height=841.890)
+    
+    
+    pdf.save()
+    # Set the buffer position to the beginning for reading
+    pdf_buffer.seek(0)
+    return pdf_buffer.read()
+  
 #Feedback
 def feedback(request):
     if request.method == 'POST':
         name=request.POST.get('name')
+        print('name')
+        email=request.POST.get('email')
+        print(gmail)
+        APP='PDF_Maker'
+        admin_gmail='feedback.s5tech@gmail.com'
         feedback=request.POST.get('feedback')
+        subject=request.POST.get('subject')
+        message=request.POST.get('message')
+        
         send_mail(
-            'feedback',
-            'Name: {}\nfeedback: {}'.format(name,feedback),
-            'sohebfaruque@gmail.com',
-            ['soyebali0101@gmail.com'],
+            'Feedback for {} APP'.format(APP),
+            'NAME:{}\nEMAIL:{}\nFeedback for:{}\nsubject:{}\n{}'.format(name,email,feedback,subject,message),
+            's5tech.sendmail@gmail.com',[admin_gmail],
             fail_silently=False
-            
-        )
+            )
+        
+        
+        
         return redirect('Home')
     return render(request,'feedback.html')
+

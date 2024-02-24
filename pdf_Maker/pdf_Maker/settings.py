@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'pdf_Maker',
     'userData',
     'soyeb_s5',
+    'django_multi_mail_backend',
     
     
 ]
@@ -136,7 +137,4 @@ EMAIL_HOST_USER='sohebfaruque@gmail.com'
 EMAIL_HOST_PASSWORD='zzkj wact ytuh aail'
 EMAIL_USE_TLS=True
 
-#media
-MEDIA_ROOT=BASE_DIR/"media"
-MEDIA_URL="/media/"
 
