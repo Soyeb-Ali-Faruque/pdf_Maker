@@ -29,7 +29,7 @@ from reportlab.lib.utils import ImageReader
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate, Paragraph,  Image as PlatypusImage
 
-from PyPDF2 import PdfFileReader, PdfFileWriter
+from PyPDF2 import PdfReader, PdfWriter
 
 
 
@@ -390,12 +390,17 @@ def convert_image_to_pdf(file):
 def compressImage(request):
     if request.method == 'POST':
         image_file = request.FILES.get('file')
-        print("Image file:", image_file.name)  # Debugging
-        target_size_kb = int(request.POST.get('target_size_kb', 25)) 
-        print("Target size:", target_size_kb)  
+        
+        target_size= int(request.POST.get('target_size')) 
+        unit=request.POST.get('unit')
+        
+        if unit == 'MB':
+            # converting the mb to kb
+            target_size= target_size * 1024
+
         
         # Call the function for compression
-        compressed_img = compress_image(image_file, target_size_kb)
+        compressed_img = compress_image(image_file, target_size)
         
         # Prepare response
         response = HttpResponse(compressed_img.getvalue(), content_type='image/jpeg')
@@ -445,12 +450,20 @@ def compress_image(file, target_size_kb=300):
             quality = (min_quality + max_quality) // 2
     
     return compressed_img
+
+
 def compressPdf(request):
-    if request.method == 'POST' and request.FILES.get('pdf_file'):
+    if request.method == 'POST':
         pdf_file = request.FILES['file']
+        target_size= int(request.POST.get('target_size')) 
+        unit=request.POST.get('unit')
+        
+        if unit == 'MB':
+            # converting the mb to kb
+            target_size *= 1024
         
         # Call the function for compression
-        compressed_pdf = compress_pdf(pdf_file)
+        compressed_pdf = compress_pdf(pdf_file,target_size)
         
         # Prepare response
         response = HttpResponse(compressed_pdf.getvalue(), content_type='application/pdf')
@@ -458,22 +471,6 @@ def compressPdf(request):
         return response
     return render(request,'CompressFILE.html',{'file_type':'.pdf'})
 
-def compress_pdf(file):
-    pdf_reader = PdfFileReader(file)
-    pdf_writer = PdfFileWriter()
-
-    # Compress each page of the PDF
-    for page_num in range(pdf_reader.numPages):
-        page = pdf_reader.getPage(page_num)
-        page.compressContentStreams()  # Compress content streams
-        pdf_writer.addPage(page)
-
-    # Prepare the compressed PDF in memory
-    compressed_pdf = BytesIO()
-    pdf_writer.write(compressed_pdf)
-    compressed_pdf.seek(0)
-
-    return compressed_pdf
 
  #Feedback
 def feedback(request):
