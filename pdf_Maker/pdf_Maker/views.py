@@ -107,7 +107,7 @@ def signup(request):
        #sending otp to the associated mail
         send_mail(
             'otp-verification','your otp is {}'.format(otpValue),
-            '',[email],
+            's5tech.sendmail@gmail.com',[email],
              fail_silently=False,
           )
         
@@ -134,7 +134,7 @@ def otp(request):
            #sending username password
             send_mail(
                 'your login credential','your username is {} and password is {}'.format(username,request.session.get('password')),
-                '',[email],
+                's5tech.sendmail@gmail.com',[email],
                 fail_silently=False
                 )
             
@@ -160,41 +160,47 @@ def otp(request):
 
 # forget password otp  generation
 def forgetpass(request):
-    if request.method =='POST':
-        #get form data from template
-        email=request.POST.get('email')
-        password=request.POST.get('password')
-        repassword=request.POST.get('repassword')
-        
-        
+    if request.method == 'POST':
+        # Get form data from the template
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        repassword = request.POST.get('repassword')
+
         try:
-            user_data=userdata.objects.get(email=email)
-        
+            # Attempt to retrieve user data based on the provided email
+            user_data = userdata.objects.get(email=email)
+            print(user_data.email)  # Debug print to check if the user data is retrieved correctly
+
+            # Check if passwords match
             if password != repassword:
-                return render(request,'forgetpass.html',{'incorrectPassword':True,'email':email})
-        
-        #generate otp for verification
-            otpValue=""
-            for i in range(0,6):
-                otpValue+=str(random.randrange(0,9))
-        
-            request.session['email']=email    
-            request.session['otp']=otpValue           
-            request.session['password']=make_password(password)          
-        
-        
-            #sending mail to the user
+                return render(request, 'forgetpass.html', {'incorrectPassword': True, 'email': email})
+
+            # Generate OTP for verification
+            otpValue = ""
+            for i in range(0, 6):
+                otpValue += str(random.randrange(0, 9))
+
+            # Store data in session for further verification
+            request.session['email'] = email
+            request.session['otp'] = otpValue
+            request.session['password'] = make_password(password)
+
+            # Sending mail to the user
             send_mail(
-                'otp-reset your password','your otp is {}'.format(otpValue),
-                '',[email],
-                backend='otp',
+                'otp-reset your password', 'your otp is {}'.format(otpValue),
+                's5tech.sendmail@gmail.com', [email],
                 fail_silently=False
             )
-           
+
+            # Redirect to OTP verification page
             return redirect('/forget-password-OTP')
-        except:
-            return render(request,'forgetpass.html',{'wrongEmail':True})
-    return render(request,'forgetpass.html')
+        except userdata.DoesNotExist:
+            # User data doesn't exist for the provided email
+            return render(request, 'forgetpass.html', {'wrongEmail': True})
+
+    # Render the forgetpass.html template for GET requests
+    return render(request, 'forgetpass.html')
+
 
 def forget_otp(request):
     if request.method == 'POST':
@@ -371,7 +377,24 @@ def convert_image_to_pdf(file):
 def feedback(request):
     if request.method == 'POST':
         name=request.POST.get('name')
+        print('name')
+        email=request.POST.get('email')
+        print(gmail)
+        APP='PDF_Maker'
+        admin_gmail='feedback.s5tech@gmail.com'
         feedback=request.POST.get('feedback')
+        subject=request.POST.get('subject')
+        message=request.POST.get('message')
+        
+        send_mail(
+            'Feedback for {} APP'.format(APP),
+            'NAME:{}\nEMAIL:{}\nFeedback for:{}\nsubject:{}\n{}'.format(name,email,feedback,subject,message),
+            's5tech.sendmail@gmail.com',[admin_gmail],
+            fail_silently=False
+            )
+        
+        
         
         return redirect('Home')
     return render(request,'feedback.html')
+
