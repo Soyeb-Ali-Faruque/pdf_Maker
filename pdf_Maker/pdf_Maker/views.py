@@ -305,6 +305,19 @@ def delete_account(request):
 
 #pdf generations from different file__________________-___________________
 
+def isActive():
+    user = request.session.get('user_id', None)
+    if user is not None:
+        return True
+    return False
+   
+def store_user_history(user_file,pdf_file):
+    user_id=request.session.get('user_id')
+    UserFile.objects.create(
+        user=user_id,
+        user_file=user_file,
+        pdf_file=pdf_file,    
+        )
 # text to pdf
 def textToPdf(request):
     if request.method == 'POST':
@@ -320,6 +333,10 @@ def textToPdf(request):
            
            
             pdf_content = convert_text_to_pdf(user_file)
+            if isActive == True:
+                store_user_history(user_file,pdf_content)
+                
+            
 
             # Send the PDF to the frontend for automatic downloading
             response = HttpResponse(pdf_content, content_type='application/pdf')
@@ -346,7 +363,7 @@ def convert_text_to_pdf(file):
     # Set the buffer position to the beginning for reading
     pdf_buffer.seek(0)
     # Return the filename for use in Content-Disposition header
-    return pdf_buffer
+    return pdf_buffer.getvalue()
 
 
 
@@ -382,7 +399,7 @@ def convert_image_to_pdf(file):
     pdf.save()
     # Set the buffer position to the beginning for reading
     pdf_buffer.seek(0)
-    return pdf_buffer.read()
+    return pdf_buffer.getvalue()
 
 
 
