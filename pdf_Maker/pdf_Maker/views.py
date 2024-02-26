@@ -107,7 +107,7 @@ def signup(request):
        #sending otp to the associated mail
         send_mail(
             'otp-verification','your otp is {}'.format(otpValue),
-            's5tech.sendmail@gmail.com',[email],
+            'sohebfaruque@gmail.com',[email],
              fail_silently=False,
           )
         
@@ -134,7 +134,7 @@ def otp(request):
            #sending username password
             send_mail(
                 'your login credential','your username is {} and password is {}'.format(username,request.session.get('password')),
-                's5tech.sendmail@gmail.com',[email],
+                'sohebfaruque@gmail.com',[email],
                 fail_silently=False
                 )
             
@@ -187,16 +187,20 @@ def forgetpass(request):
 
             # Sending mail to the user
             send_mail(
-                'otp-reset your password', 'your otp is {}'.format(otpValue),
-                's5tech.sendmail@gmail.com', [email],
+                'otp-reset your password', 
+                'your otp is {}'.format(otpValue),
+                'sohebfaruque@gmail.com', [email],
                 fail_silently=False
             )
 
             # Redirect to OTP verification page
-            return redirect('/forget-password-OTP')
+            return redirect('Forget-otp')
         except userdata.DoesNotExist:
             # User data doesn't exist for the provided email
             return render(request, 'forgetpass.html', {'wrongEmail': True})
+        except Exception as e:
+            # Handle exception (e.g., log error, display error message)
+            print("An error occurred while sending email:", e)
 
     # Render the forgetpass.html template for GET requests
     return render(request, 'forgetpass.html')
@@ -389,7 +393,7 @@ def feedback(request):
         send_mail(
             'Feedback for {} APP'.format(APP),
             'NAME:{}\nEMAIL:{}\nFeedback for:{}\nsubject:{}\n{}'.format(name,email,feedback,subject,message),
-            's5tech.sendmail@gmail.com',[admin_gmail],
+            'sohebfaruque@gmail.com',[admin_gmail],
             fail_silently=False
             )
         
