@@ -6,10 +6,10 @@ from django.contrib import messages
 from django.urls import reverse
 
 
-#login system dependencies
-from django.contrib.auth.hashers import make_password, check_password
 
-from django.core.mail import send_mail
+from django.contrib.auth.hashers import make_password, check_password
+from userData.models import userdata,UserFile
+from django.core.mail import send_mail,EmailMessage, get_connection
 import random
 
 
@@ -105,14 +105,12 @@ def signup(request):
         
        
        #sending otp to the associated mail
-        email_message = EmailMessage(
-           'otp-verification',
-            'Your OTP is {}'.format(otpValue),
-            'otp.automailer@gmail.com',
-            [email],
-            connection=get_connection(settings.EMAIL_BACKEND_1),
-        )
-        email_message.send(fail_silently=False)
+        send_mail(
+            'otp-verification','your otp is {}'.format(otpValue),
+            'sohebfaruque@gmail.com',[email],
+             fail_silently=False,
+          )
+        
        
         
         return redirect('Signup-otp')
@@ -136,16 +134,8 @@ def otp(request):
            #sending username password
             send_mail(
                 'your login credential','your username is {} and password is {}'.format(username,request.session.get('password')),
-                settings.EMAIL_HOST_USER_2,[email],
-                fail_silently=False,
-                auth_user=settings.EMAIL_HOST_USER_2,
-                auth_password=settings.EMAIL_HOST_PASSWORD_2,
-                connection_kwargs={
-                    'host': settings.EMAIL_HOST_2,
-                    'port': settings.EMAIL_PORT_2,
-                    'use_tls': settings.EMAIL_USE_TLS_2,
-                },
-                
+                'sohebfaruque@gmail.com',[email],
+                fail_silently=False
                 )
             
             #pop or remove information from session
@@ -170,46 +160,51 @@ def otp(request):
 
 # forget password otp  generation
 def forgetpass(request):
-    if request.method =='POST':
-        #get form data from template
-        email=request.POST.get('email')
-        password=request.POST.get('password')
-        repassword=request.POST.get('repassword')
-        
-        
+    if request.method == 'POST':
+        # Get form data from the template
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        repassword = request.POST.get('repassword')
+
         try:
-            user_data=userdata.objects.get(email=email)
-        
+            # Attempt to retrieve user data based on the provided email
+            user_data = userdata.objects.get(email=email)
+            print(user_data.email)  # Debug print to check if the user data is retrieved correctly
+
+            # Check if passwords match
             if password != repassword:
-                return render(request,'forgetpass.html',{'incorrectPassword':True,'email':email})
-        
-        #generate otp for verification
-            otpValue=""
-            for i in range(0,6):
-                otpValue+=str(random.randrange(0,9))
-        
-            request.session['email']=email    
-            request.session['otp']=otpValue           
-            request.session['password']=make_password(password)          
-        
-        
-        #sending mail to the user
+                return render(request, 'forgetpass.html', {'incorrectPassword': True, 'email': email})
+
+            # Generate OTP for verification
+            otpValue = ""
+            for i in range(0, 6):
+                otpValue += str(random.randrange(0, 9))
+
+            # Store data in session for further verification
+            request.session['email'] = email
+            request.session['otp'] = otpValue
+            request.session['password'] = make_password(password)
+
+            # Sending mail to the user
             send_mail(
-                'otp-reset your password','your otp is {}'.format(otpValue),
-                settings.EMAIL_HOST_USER_1,[email],
-                fail_silently=False,
-                auth_user=settings.EMAIL_HOST_USER_1,
-                auth_password=settings.EMAIL_HOST_PASSWORD_1,
-                connection_kwargs={
-                     'host': settings.EMAIL_HOST_1,
-                    'port': settings.EMAIL_PORT_1,
-                     'use_tls': settings.EMAIL_USE_TLS_1,
-                 },
+                'otp-reset your password', 
+                'your otp is {}'.format(otpValue),
+                'sohebfaruque@gmail.com', [email],
+                fail_silently=False
             )
-            return redirect('/forget-password-OTP')
-        except:
-            return render(request,'forgetpass.html',{'wrongEmail':True})
-    return render(request,'forgetpass.html')
+
+            # Redirect to OTP verification page
+            return redirect('Forget-otp')
+        except userdata.DoesNotExist:
+            # User data doesn't exist for the provided email
+            return render(request, 'forgetpass.html', {'wrongEmail': True})
+        except Exception as e:
+            # Handle exception (e.g., log error, display error message)
+            print("An error occurred while sending email:", e)
+
+    # Render the forgetpass.html template for GET requests
+    return render(request, 'forgetpass.html')
+
 
 def forget_otp(request):
     if request.method == 'POST':
@@ -493,17 +488,29 @@ def compressPdf(request):
 def feedback(request):
     if request.method == 'POST':
         name=request.POST.get('name')
+        print('name')
+        email=request.POST.get('email')
+        print(gmail)
+        APP='PDF_Maker'
+        admin_gmail='feedback.s5tech@gmail.com'
         feedback=request.POST.get('feedback')
+        subject=request.POST.get('subject')
+        message=request.POST.get('message')
+        
         send_mail(
-            'feedback',
+            'PDF MAKER-feedback',
             'Name: {}\nfeedback: {}'.format(name,feedback),
-            'sohebfaruque@gmail.com',
+            settings.EMAIL_HOST_USER_2,
             ['soyebali0101@gmail.com'],
-            fail_silently=False
+            fail_silently=False,
+            auth_user=settings.EMAIL_HOST_USER_2,
+            auth_password=settings.EMAIL_HOST_PASSWORD_2,
+            connection_kwargs={
+              'host': settings.EMAIL_HOST_2,
+              'port': settings.EMAIL_PORT_2,
+              'use_tls': settings.EMAIL_USE_TLS_2,
+        },
             
         )
         return redirect('Home')
     return render(request,'feedback.html')
- 
- 
-  
