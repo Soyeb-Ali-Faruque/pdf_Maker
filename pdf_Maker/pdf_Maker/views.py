@@ -9,7 +9,7 @@ from django.urls import reverse
 
 from django.contrib.auth.hashers import make_password, check_password
 from userData.models import userdata,UserFile
-from django.core.mail import send_mail,EmailMessage, get_connection
+from django.core.mail import send_mail
 import random
 
 
@@ -36,6 +36,7 @@ from PyPDF2 import PdfReader, PdfWriter
 
 
 def home(request):
+    
     return render(request,'index.html')
   
 
@@ -300,23 +301,31 @@ def delete_account(request):
 
 #pdf generations from different file__________________-___________________
 
-def isActive():
+def isActive(request):
     user = request.session.get('user_id', None)
+    print("user primary key",user)
     if user is not None:
         return True
     return False
-   
-def store_user_history(user_file,pdf_file):
-    user_id=request.session.get('user_id')
-    UserFile.objects.create(
-        user=user_id,
-        user_file=user_file,
-        pdf_file=pdf_file,    
+def store_user_history(request, user_file, pdf_content):
+    user_id = request.session.get('user_id')
+    if user_id:
+        user_data = userdata.objects.get(pk=user_id)
+        # Create a new entry in UserFile table
+        user_history = UserFile.objects.create(
+            user=user_data,
+            user_file=user_file,
+            
         )
+        user_history.save()
+
+    
+
 # text to pdf
 def textToPdf(request):
     if request.method == 'POST':
         user_file=request.FILES.get('file')
+        file=user_file
         if user_file:
             # Set the file size limit (600 KB)
             size_limit_kb = 600
@@ -328,8 +337,9 @@ def textToPdf(request):
            
            
             pdf_content = convert_text_to_pdf(user_file)
-            if isActive == True:
-                store_user_history(user_file,pdf_content)
+            print(isActive(request))
+            if isActive(request) == True:
+                store_user_history(request,file,pdf_content)
                 
             
 
@@ -368,6 +378,8 @@ def imgToPdf(request):
     if request.method == 'POST':
         user_file=request.FILES.get('file')
         pdf_content = convert_image_to_pdf(user_file)
+        if isActive == True:
+                store_user_history(user_file,pdf_content)
 
         # Send the PDF to the frontend for automatic downloading
         response = HttpResponse(pdf_content, content_type='application/pdf')
