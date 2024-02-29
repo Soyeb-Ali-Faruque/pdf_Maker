@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Your Files</th>
+                <th>Download Your File</th>
+                <th>Your PDF Files</th>
+                <th>Download Your PDF</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>2024-02-28</td>
+                <td>12:00 PM</td>
+                <td>file_name.pdf</td>
+                <td><a href="path/to/your/file" class="btn btn-primary">Download</a></td>
+                <td>pdf_name.pdf</td>
+                <td><a href="path/to/your/pdf" class="btn btn-primary">Download</a></td>
+            </tr>
+            <!-- Add more rows as needed -->
+        </tbody>
+    </table>
+</div>
+
+
+<style>
+
+    .container {
+        margin-top: 100px;
+    }
+</style>
+{% endblock %}

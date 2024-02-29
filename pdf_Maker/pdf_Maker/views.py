@@ -40,6 +40,8 @@ def home(request):
     return render(request,'index.html')
   
 
+#-----------------user login and sign up and forget login credential-------------------------#
+
 def loginto(request):
     message_password_updated=request.GET.get('passwordUpdated',False)
     message_acc_created=request.GET.get('acc_created',False)
@@ -64,15 +66,9 @@ def loginto(request):
             return render(request,'login.html',{'error':True})
      
     return render(request,'login.html',{'pass_updated':message_password_updated,'acc_created':message_acc_created})
-
-
 def logout(request):
     request.session.pop('user_id',None)
     return redirect('/')
-
-# this code is for sign up
-#------------------sign up-------------------------------#
-
 def signup(request):
     if request.method =='POST':
         email=request.POST.get('uemail')
@@ -153,13 +149,6 @@ def otp(request):
         else:
             return render(request,'otp.html',{'incorrect':True})
     return render(request,'otp.html')       
-  
-#---------------sign up------------------------#
-
-
-
-
-# forget password otp  generation
 def forgetpass(request):
     if request.method == 'POST':
         # Get form data from the template
@@ -205,8 +194,6 @@ def forgetpass(request):
 
     # Render the forgetpass.html template for GET requests
     return render(request, 'forgetpass.html')
-
-
 def forget_otp(request):
     if request.method == 'POST':
         otp_from_user=request.POST.get('otp')
@@ -228,12 +215,13 @@ def forget_otp(request):
             
     return render(request,'otp.html')
 
-#user profile
+
+
+#--------------------------user account operations------------------------------------------#
+
 def profile(request):
     error=request.GET.get('errorOccurr',None)
     return render(request,'profile.html',{'error':error})
-
-
 def update_picture(request):
     user_id=request.session.get('user_id')
     user=userdata.objects.get(pk=user_id)
@@ -249,7 +237,6 @@ def update_picture(request):
         user.save()
         
     return redirect('Profile')
-
 def remove_picture(request):
     user_id=request.session.get('user_id')
     user=userdata.objects.get(pk=user_id)
@@ -298,8 +285,11 @@ def delete_account(request):
         else:
             return render(request,'deleteAccount.html',{'userPassword':True})
     return render(request,'deleteAccount.html')
+def user_history(request):
+    return render(request,'userHistory.html')
 
-#pdf generations from different file__________________-___________________
+
+#-----------------------------file conversion-----------------------------------------#
 
 def isActive(request):
     user = request.session.get('user_id', None)
@@ -318,10 +308,6 @@ def store_user_history(request, user_file, pdf_content):
             
         )
         user_history.save()
-
-    
-
-# text to pdf
 def textToPdf(request):
     if request.method == 'POST':
         user_file=request.FILES.get('file')
@@ -348,8 +334,6 @@ def textToPdf(request):
             response['Content-Disposition'] = f'attachment; filename="{user_file.name.replace(".txt", ".pdf")}"'
             return response
     return render(request,'pdf.html',{'file_accept':'.txt'})
-
- 
 def convert_text_to_pdf(file):
     # Create a BytesIO buffer to store the PDF content
     pdf_buffer = BytesIO()
@@ -369,11 +353,6 @@ def convert_text_to_pdf(file):
     pdf_buffer.seek(0)
     # Return the filename for use in Content-Disposition header
     return pdf_buffer.getvalue()
-
-
-
-
-#Image to pdf
 def imgToPdf(request):
     if request.method == 'POST':
         user_file=request.FILES.get('file')
@@ -387,7 +366,6 @@ def imgToPdf(request):
         return response
         
     return render(request,'pdf.html',{'file_accept':'.png, .jpg, .jpeg'})
-
 def convert_image_to_pdf(file):
     pdf_buffer = BytesIO()
      # Create a PDF document using reportlab
@@ -407,10 +385,6 @@ def convert_image_to_pdf(file):
     # Set the buffer position to the beginning for reading
     pdf_buffer.seek(0)
     return pdf_buffer.getvalue()
-
-
-
-# Compress Files
 def compressImage(request):
     if request.method == 'POST':
         image_file = request.FILES.get('file')
@@ -432,9 +406,6 @@ def compressImage(request):
         return response
 
     return render(request, 'CompressFILE.html', {'file_type': '.png, .jpg, .jpeg'})
-
- 
-
 def compress_image(file, target_size_kb=300):
     img = Image.open(file)
     original_size = img.size[0] * img.size[1] * 3  
@@ -474,8 +445,6 @@ def compress_image(file, target_size_kb=300):
             quality = (min_quality + max_quality) // 2
     
     return compressed_img
-
-
 def compressPdf(request):
     if request.method == 'POST':
         pdf_file = request.FILES['file']
@@ -497,6 +466,11 @@ def compressPdf(request):
 
 
  #Feedback
+
+
+
+#----------------------------------------------------------------------#
+
 def feedback(request):
     if request.method == 'POST':
         name=request.POST.get('name')

@@ -23,23 +23,39 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    
+    
     path('',views.home,name='Home'),
+    
+    # user login and sign up and forget login credential
     path('login/',views.loginto,name='Login'),
     path('logout/',views.logout,name='Logout'),
     path('signup/',views.signup,name='Signup'),
     path('otp-verification',views.otp,name='Signup-otp'),
     path('forget-password/',views.forgetpass,name='Forget-password'),   
     path('forget-password-OTP/',views.forget_otp,name='Forget-otp'), 
+    
+    
+    # user account operations
     path('user-profile/',views.profile,name='Profile'),
     path('profile-picture-update',views.update_picture,name='Update-picture'),
     path('profile-picture-remove',views.remove_picture,name='Remove-picture'),
     path('update-name/',views.update_name,name='Update-name'),
     path('update-username/',views.update_username,name='Update-username'),
     path('delete-account/',views.delete_account,name='Delete-account'),
+    path('user-history/',views.user_history,name='User-history'),
+    
+    
+    # file conversion
     path('text-to-pdf',views.textToPdf,name='Text-To-Pdf'),
     path('image-to-pdf',views.imgToPdf,name='Image-To-Pdf'),
     path('compress-image',views.compressImage,name='Compress-image'), 
     path('compress-pdf',views.compressPdf,name='Compress-pdf'), 
+    
+    
+    
+    
+    
     path('feedback/',views.feedback,name="Feedback"),
     
     
