@@ -1,16 +1,18 @@
+import random
+
+
+#SYSTEM 
 import os
 from django.conf import settings
-from django.shortcuts import render,redirect
-from django.http import HttpResponse
-from django.contrib import messages
+
+#DJANGO MODULES
 from django.urls import reverse
-
-
-
-from django.contrib.auth.hashers import make_password, check_password
-from userData.models import userdata,UserFile
+from django.contrib import messages
+from django.http import HttpResponse
 from django.core.mail import send_mail
-import random
+from django.shortcuts import render,redirect
+from django.contrib.auth.hashers import make_password, check_password
+
 
 
 #MODELS
@@ -19,17 +21,16 @@ from userData.models import userdata,UserFile
 
 
 
-#used for different file to pdf generation
-
+#FILE OPERATION MODULES
+from PIL import Image
 from io import BytesIO
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
-from PIL import Image
 from reportlab.lib.utils import ImageReader
 from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.platypus import SimpleDocTemplate, Paragraph,  Image as PlatypusImage
+from reportlab.platypus import SimpleDocTemplate, Paragraph  
+#Image as PlatypusImage
 
-from PyPDF2 import PdfReader, PdfWriter
 
 
 
