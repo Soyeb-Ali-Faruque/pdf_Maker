@@ -14,3 +14,4 @@ class UserFile(models.Model):
     user_file = models.FileField(upload_to="user/user_files/",null=True, default=None)
     pdf_file = models.FileField(upload_to="user/pdf_files/",null=True, default=None)
     created_at = models.DateTimeField(auto_now_add=True)
+
