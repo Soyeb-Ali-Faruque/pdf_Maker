@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load custom_filters %}
 {% block content %}
 <div class="container">
     <table class="table table-striped">
@@ -14,22 +14,21 @@
             </tr>
         </thead>
         <tbody>
+            {% for file in user_files %}
             <tr>
-                <td>2024-02-28</td>
-                <td>12:00 PM</td>
-                <td>file_name.pdf</td>
-                <td><a href="path/to/your/file" class="btn btn-primary">Download</a></td>
-                <td>pdf_name.pdf</td>
-                <td><a href="path/to/your/pdf" class="btn btn-primary">Download</a></td>
+                <td>{{ file.created_at|date:"Y-m-d" }}</td>
+                <td>{{ file.created_at|time:"h:i A" }}</td>
+                <td>{{ file.user_file.name|extract_filename }}</td>
+                <td><a href="{{ file.user_file.url }}" class="btn btn-primary" download>Download</a></td>
+                <td>{{ file.pdf_file.name|extract_filename }}</td>
+                <td><a href="{{ file.pdf_file.url }}" class="btn btn-primary" download>Download</a></td>
             </tr>
-            <!-- Add more rows as needed -->
+            {% endfor %}
         </tbody>
     </table>
 </div>
 
-
 <style>
-
     .container {
         margin-top: 100px;
     }

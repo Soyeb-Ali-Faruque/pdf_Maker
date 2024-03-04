@@ -1,18 +1,16 @@
-
-
 <!DOCTYPE html>
 
 <!-- Created by CodingLab |www.youtube.com/c/CodingLabYT-->
 <html lang="en" dir="ltr">
   <head>
     <meta charset="UTF-8">
-    <!--<title> Login and Registration Form in HTML & CSS | CodingLab </title>-->
-    <link rel="stylesheet" href="/static/css/style.css">
-    <!-- Fontawesome CDN Link -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <title> Login and Registration  </title>
+    <link rel="stylesheet" type="text/css" href="/static/css/login.css"> 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   </head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">   
+  </head>
 <body>
+  <script src="/static/javascript/login.js"></script>
   <div class="container">
     <input type="checkbox" id="flip">
     <div class="cover">
@@ -59,7 +57,7 @@
                 <i class="fas fa-lock"></i>
                 <input type="password" placeholder="Enter your password" name="pass" required>
               </div>
-              <div class="text"><a href="{% url 'Forget-password' %}">Forgot password?</a></div>
+              <div class="text"><a href="{% url 'forget_password' %}">Forgot password?</a></div>
               <div class="button input-box">
                 <input type="submit" value="Sumbit">
               </div>
@@ -69,7 +67,7 @@
       </div>
         <div class="signup-form">
           <div class="title">Signup</div>
-        <form action="/signup/" method="post">
+        <form action="{% url 'signup' %}" method="post">
           {% csrf_token %}
             <div class="input-boxes">
               
@@ -95,17 +93,6 @@
     </div>
     </div>
   </div>
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const flipCheckbox = document.getElementById('flip');
-        const loginForm = document.querySelector('.login-form');
-        const signupForm = document.querySelector('.signup-form');
 
-        flipCheckbox.addEventListener('change', function () {
-            loginForm.classList.toggle('active');
-            signupForm.classList.toggle('active');
-        });
-    });
-</script>
 </body>
 </html>

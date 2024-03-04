@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% block title %}PDF_Maker - Transforming Files into PDFs{% endblock %}
 {% block content %}
 
 <div style="margin-top: 100px; text-align: center;">
@@ -6,22 +7,22 @@
   <p>Create and manage your PDFs with ease.</p>
 </div>
 
-    {% comment %} <h2>Welcome to PDF Maker!</h2>
-    <p>Create and manage your PDFs with ease.</p> {% endcomment %}
+  
     
     <div class="container">
         <h1>Document Conversion Options</h1>
         <div class="option">
-          <a href="{% url 'Text-To-Pdf' %}">Text(.txt) to PDF</a>
+          <a href="{% url 'text_to_pdf' %}">Text(.txt) to PDF</a>
+        </div>
+
+        <div class="option">
+          <a href="{% url 'image_to_pdf' %}">Image(.png, .jpg, .jpeg) to PDF</a>
         </div>
         <div class="option">
-          <a href="{% url 'Image-To-Pdf' %}">Image(.png, .jpg, .jpeg) to PDF</a>
-        </div>
-        <div class="option">
-          <a href="{% url 'Compress-image' %}">COMPRESS YOUR IMAGE FILES</a>
+          <a href="{% url 'compress_image' %}">COMPRESS YOUR IMAGE FILES</a>
         </div> 
         <div class="option">
-          <a href="{% url 'Compress-pdf' %}">COMPRESS YOUR PDF FILES</a>
+          <a href="{% url 'compress_pdf' %}">COMPRESS YOUR PDF FILES</a>
         </div> 
         
     </div>

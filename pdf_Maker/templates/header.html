@@ -7,8 +7,8 @@
             <li class="dropdown">
                 <a href="#" class="dropbtn">Features</a>
                 <div class="dropdown-content">
-                    <a href="{% url 'Text-To-Pdf' %}">convert text to pdf</a>
-                    <a href="{% url 'Image-To-Pdf' %}">convert image to pdf</a>
+                    <a href="{% url 'text_to_pdf' %}">convert text to pdf</a>
+                    <a href="{% url 'image_to_pdf' %}">convert image to pdf</a>
                     
                     
                     <!-- Add more feature links as needed -->
@@ -25,14 +25,14 @@
                 <!--    <p class="user-name">{{user.userName}}</p>-->
                     <div class="profile-options" id="profile-options">
                         
-                        <a href="{% url 'Profile' %}">Profile</a>
-                        <a href="/history">History</a>
-                        <a href="/logout">Logout</a>
+                        <a href="{% url 'profile' %}">Profile</a>
+                        <a href="{% url 'user_history' %}">History</a>
+                        <a href="{% url 'logout' %}">Logout</a>
                     </div>
                 </div>
             </li>
         {% else %} 
-            <li><a href="/login/" style="border:2px solid red;">Login</a></li>
+            <li><a href="{% url 'login' %}" style="border:2px solid red;">Login</a></li>
         {% endif %}
         </ul>
     </nav>

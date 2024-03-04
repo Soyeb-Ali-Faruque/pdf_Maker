@@ -17,51 +17,39 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from pdf_Maker import views
-from django.conf import settings
-from django.conf.urls.static import static
+
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    #Admin
+    path('admin/', admin.site.urls,name='admin'),
     
+    #Home
+    path('',views.home_view,name='home'),
     
-    path('',views.home,name='Home'),
-    
-    # user login and sign up and forget login credential
-    path('login/',views.loginto,name='Login'),
-    path('logout/',views.logout,name='Logout'),
-    path('signup/',views.signup,name='Signup'),
-    path('otp-verification',views.otp,name='Signup-otp'),
-    path('forget-password/',views.forgetpass,name='Forget-password'),   
-    path('forget-password-OTP/',views.forget_otp,name='Forget-otp'), 
-    
-    
-    # user account operations
-    path('user-profile/',views.profile,name='Profile'),
-    path('profile-picture-update',views.update_picture,name='Update-picture'),
-    path('profile-picture-remove',views.remove_picture,name='Remove-picture'),
-    path('update-name/',views.update_name,name='Update-name'),
-    path('update-username/',views.update_username,name='Update-username'),
-    path('delete-account/',views.delete_account,name='Delete-account'),
-    path('user-history/',views.user_history,name='User-history'),
-    
-    
-    # file conversion
-    path('text-to-pdf',views.textToPdf,name='Text-To-Pdf'),
-    path('image-to-pdf',views.imgToPdf,name='Image-To-Pdf'),
-    path('compress-image',views.compressImage,name='Compress-image'), 
-    path('compress-pdf',views.compressPdf,name='Compress-pdf'), 
-    
-    
-    
-    
-    
-    path('feedback/',views.feedback,name="Feedback"),
-    
-    
-    
-    
-    
+    # Authentication
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
+    path('signup/', views.signup_view, name='signup'),
+    path('otp_verification/', views.otp_view, name='signup_otp'),
+    path('forget_password/', views.forget_password_view, name='forget_password'),
+    path('forget_password_OTP/', views.forget_otp_view, name='forget_otp'),
+
+    # User account operations
+    path('user_profile/', views.profile_view, name='profile'),
+    path('profile_picture_update/', views.update_picture_view, name='update_picture'),
+    path('profile_picture_remove/', views.remove_picture_view, name='remove_picture'),
+    path('update_name/', views.update_name_view, name='update_name'),
+    path('update_username/', views.update_username_view, name='update_username'),
+    path('delete_account/', views.delete_account_view, name='delete_account'),
+    path('user_history/', views.user_history_view, name='user_history'),
+
+    # File conversion
+    path('text_to_pdf/', views.text_to_pdf_view, name='text_to_pdf'),
+    path('image_to_pdf/', views.img_to_pdf_view, name='image_to_pdf'),
+    path('compress_image/', views.compress_image_view, name='compress_image'),
+    path('compress_pdf/', views.compress_pdf_view, name='compress_pdf'),
+
+    # Feedback
+    path('feedback/', views.feedback_view, name='feedback')
 ]
-if settings.DEBUG:
-    urlpatterns+=static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)

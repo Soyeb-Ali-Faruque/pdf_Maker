@@ -2,15 +2,14 @@ from userData.models import userdata
 
 def userInformation(request):
     user_id = request.session.get('user_id',None)
-    print(user_id)
     user_information = None
     
     try:
         if user_id is not None:
             user_information = userdata.objects.get(pk=user_id)
         else:
-            # emergency fix default object
-            user_information = userdata.objects.get(pk=1)
+        #     # emergency fix default object
+            user_information = userdata.objects.get(pk=2)
             
             
     except userdata.DoesNotExist:

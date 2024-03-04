@@ -1,8 +1,8 @@
 {% extends "base.html" %}
-{% load static %}
+
 {% block content %}
 {% load static %}
-
+<script src="/static/javascript/profile.js"></script>
 <div class="profile-container">
     <div class="profile-section">
         <div class="profile-pic">
@@ -13,14 +13,14 @@
             {% endif %}
         </div>
         <div class="profile-buttons">
-            <form method="post" action="{% url 'Update-picture' %}" enctype="multipart/form-data" id="profile-picture-form">
+            <form method="post" action="{% url 'update_picture' %}" enctype="multipart/form-data" id="profile-picture-form">
                 {% csrf_token %}
                 <input type="file" name="profile_picture" id="profile-picture-input" style="display: none;" onchange="displayFileName(this)">
                 <button type="button" onclick="chooseProfilePicture()">{% if user.profile_picture %} Change Picture{% else %}upload a photo {% endif %}</button>
             </form>
             <script src="{% static 'js/profile.js' %}"></script>
             
-            <form method="post" action="{% url 'Remove-picture' %}">
+            <form method="post" action="{% url 'remove_picture' %}">
                 {% csrf_token %}
                 <button type="submit" class="remove-picture-button">Remove Picture</button>
             </form>
@@ -41,7 +41,7 @@
           {% endif %}
            
           
-                <form method="post" action="{% url 'Update-name' %}" class="edit-form">
+                <form method="post" action="{% url 'update_name' %}" class="edit-form">
                     {% csrf_token %}
                     <div class="input-group mb-3">
                     
@@ -64,7 +64,7 @@
 
           
            
-                <form method="post" action="{% url 'Update-username' %}" class="edit-form">
+                <form method="post" action="{% url 'update_username' %}" class="edit-form">
                     {% csrf_token %}
                     <div class="input-group mb-3">
                     <input type="text" class="form-control" name='username' placeholder="{{user.userName}}">
@@ -83,8 +83,8 @@
             
               
         </div>
-        <a href="{% url 'Forget-password' %}" class="reset-password-link">Reset Password</a>
-        <form method="post" action="{% url 'Delete-account' %}">
+        <a href="{% url 'forget_password' %}" class="reset-password-link">Reset Password</a>
+        <form method="post" action="{% url 'delete_account' %}">
             {% csrf_token %}
             <button type="submit" class="delete-account-button">Delete Account</button>
         </form>

@@ -6,7 +6,7 @@
     <h2>Confirm Account Deletion</h2>
     <p>Please enter your password to confirm the account deletion.</p>
     
-    <form method="post" action="{% url 'Delete-account' %}">
+    <form method="post" action="{% url 'delete_account' %}">
         {% csrf_token %}
         {% if userPassword  and request.method == 'POST' and 'password' in request.POST  %}
         <p style="color: red;">Incorrect password. Please enter the correct password.</p>
