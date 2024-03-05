@@ -56,7 +56,7 @@ def login_view(request):
             user=userdata.objects.get(email=id)
         except userdata.DoesNotExist:
             try:
-                user=userdata.objects.get(userName=id)
+                user=userdata.objects.get(username=id)
             except userdata.DoesNotExist:
                 user=None
         if user is not None and check_password(password,user.password):
@@ -221,17 +221,19 @@ def forget_otp_view(request):
 
 
 #--------------------------user account operations------------------------------------------#
-
+def get_user(request):
+    user_id=request.session.get('user_id')
+    user=userdata.objects.get(pk=user_id)
+    return user 
 def profile_view(request):
     error=request.GET.get('errorOccurr',None)
     return render(request,'profile.html',{'error':error})
 def update_picture_view(request):
-    user_id=request.session.get('user_id')
-    user=userdata.objects.get(pk=user_id)
+    user=get_user(request)
     if request.method=='POST':
         if user.profile_picture:
             
-            path_to_delete = os.path.join(settings.MEDIA_ROOT, str(user.profile_picture))
+            path_to_delete = str(user.profile_picture)
             if os.path.exists(path_to_delete):
                 os.remove(path_to_delete)
         
@@ -241,19 +243,17 @@ def update_picture_view(request):
         
     return redirect('profile')
 def remove_picture_view(request):
-    user_id=request.session.get('user_id')
-    user=userdata.objects.get(pk=user_id)
+    user=get_user(request)
     if request.method=='POST':
         if user.profile_picture:
-            path_to_delete = os.path.join(settings.MEDIA_ROOT, str(user.profile_picture))
+            path_to_delete = str(user.profile_picture)
             if os.path.exists(path_to_delete):
                 os.remove(path_to_delete)
             user.profile_picture=None
             user.save()
     return redirect('profile')
 def update_name_view(request):
-    user_id=request.session.get('user_id')
-    user=userdata.objects.get(pk=user_id)
+    user=get_user(request)
     if request.method == 'POST':
         get_name=request.POST.get('name')
         if len(get_name) < 5:
@@ -264,25 +264,29 @@ def update_name_view(request):
             user.save()
     return redirect(reverse('profile') + f'?errorOccurr=name')
 def update_username_view(request):
-    user_id=request.session.get('user_id')
-    user=userdata.objects.get(pk=user_id)
+    user=get_user(request)
     if request.method == 'POST':
         get_username=request.POST.get('username')
         if len(get_username) < 5:
             messages.error(request, 'Please enter atlease 5 characters.')
+            return redirect(reverse('profile') + f'?errorOccurr=username')  
+        
+        elif ' ' in get_username:
+            messages.error(request, 'Username should not contain any spaces.')
+            return redirect(reverse('profile') + f'?errorOccurr=username') 
     
         else:
             user.username=get_username
             user.save()
-    return redirect(reverse('profile') + f'?errorOccurr=username')   
+            
+    
+    return redirect('profile')
 def delete_account_view(request):
-    user_id=request.session.get('user_id')
-    user=userdata.objects.get(pk=user_id)
+    user=get_user(request)
     if request.method=='POST':
         password=request.POST.get('password')
         if user is not None and check_password(password,user.password):
-            user.delete()
-            
+            user.delete()           
             return redirect('logout')
             
         else:
@@ -305,26 +309,17 @@ def isActive(request):
         return True
     return False
 def store_user_history(request, user_filename, user_file_content, pdf_filename, pdf_content):
-    print("Before user_id extraction")
-    user_id = request.session.get('user_id')
-    print("After user_id extraction. User ID:", user_id)
-    
+    user_id=request.session.get('user_id')
     if user_id:
-        user = userdata.objects.get(pk=user_id)
-        print("User object:", user)
-        
-        user_file = ContentFile(user_file_content.getvalue(), name=user_filename)
-        print("User file ContentFile object:", user_file)
-        
-        pdf_file = ContentFile(pdf_content, name=pdf_filename)
-        print("PDF file ContentFile object:", pdf_file)
-        
+        user=userdata.objects.get(pk=user_id)
+        user_file=ContentFile(user_file_content.getvalue(),name=user_filename)
+        pdf_file=ContentFile(pdf_content,name=pdf_filename)
         UserFile.objects.create(
             user=user,
             user_file=user_file,
             pdf_file=pdf_file
         )
-        print("UserFile object created successfully.")       
+     
 def text_to_pdf_view(request):
     if request.method == 'POST':
         user_file = request.FILES.get('file')

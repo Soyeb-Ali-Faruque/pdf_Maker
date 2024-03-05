@@ -67,7 +67,7 @@
                 <form method="post" action="{% url 'update_username' %}" class="edit-form">
                     {% csrf_token %}
                     <div class="input-group mb-3">
-                    <input type="text" class="form-control" name='username' placeholder="{{user.userName}}">
+                    <input type="text" class="form-control" name='username' placeholder="{{user.username}}">
                     <button class="btn btn-primary" type="submit">Change your username</button>
                     </div>
                 </form>
