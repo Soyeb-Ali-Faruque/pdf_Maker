@@ -1,13 +1,13 @@
 {% extends "base.html" %}
-
+<script src="/static/javascript/profile.js"></script>
 {% block content %}
 {% load static %}
-<script src="/static/javascript/profile.js"></script>
+
 <div class="profile-container">
     <div class="profile-section">
         <div class="profile-pic">
             {% if user.profile_picture %}
-                <img src="{{ user.profile_picture.url }}">
+                <img src="{{ user.profile_picture.url }}" id="profile-picture" onclick="toggleProfilePicture()">
             {% else %}
                 <img src="{% static 'img/noprofile.jpg' %}" >
             {% endif %}
@@ -18,8 +18,6 @@
                 <input type="file" name="profile_picture" id="profile-picture-input" style="display: none;" onchange="displayFileName(this)">
                 <button type="button" onclick="chooseProfilePicture()">{% if user.profile_picture %} Change Picture{% else %}upload a photo {% endif %}</button>
             </form>
-            <script src="{% static 'js/profile.js' %}"></script>
-            
             <form method="post" action="{% url 'remove_picture' %}">
                 {% csrf_token %}
                 <button type="submit" class="remove-picture-button">Remove Picture</button>

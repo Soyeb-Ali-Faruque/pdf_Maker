@@ -127,7 +127,7 @@ def otp_view(request):
         user_otp=request.POST.get('otp')
         if user_otp == otp:
             
-            user=userdata(email=email,password=password,name=name,userName=username)
+            user=userdata(email=email,password=password,name=name,username=username)
             user.save()
            
            
@@ -190,13 +190,13 @@ def forget_password_view(request):
             return redirect('Forget-otp')
         except userdata.DoesNotExist:
             # User data doesn't exist for the provided email
-            return render(request, 'forgetpass.html', {'wrongEmail': True})
+            return render(request, 'forget_password.html', {'wrongEmail': True})
         except Exception as e:
             # Handle exception (e.g., log error, display error message)
             print("An error occurred while sending email:", e)
 
     # Render the forgetpass.html template for GET requests
-    return render(request, 'forgetpass.html')
+    return render(request, 'forget_password.html')
 def forget_otp_view(request):
     if request.method == 'POST':
         otp_from_user=request.POST.get('otp')
@@ -233,7 +233,7 @@ def update_picture_view(request):
     if request.method=='POST':
         if user.profile_picture:
             
-            path_to_delete = str(user.profile_picture)
+            path_to_delete =os.path.join(settings.MEDIA_ROOT, str(user.profile_picture)) 
             if os.path.exists(path_to_delete):
                 os.remove(path_to_delete)
         
@@ -246,7 +246,7 @@ def remove_picture_view(request):
     user=get_user(request)
     if request.method=='POST':
         if user.profile_picture:
-            path_to_delete = str(user.profile_picture)
+            path_to_delete =os.path.join(settings.MEDIA_ROOT, str(user.profile_picture))
             if os.path.exists(path_to_delete):
                 os.remove(path_to_delete)
             user.profile_picture=None
