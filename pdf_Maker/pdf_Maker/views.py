@@ -18,7 +18,7 @@ from django.contrib.auth.hashers import make_password, check_password
 
 
 #MODELS
-from userData.models import userdata,UserFile
+from user.models import UserInformation,UserFileHistory
 
 
 

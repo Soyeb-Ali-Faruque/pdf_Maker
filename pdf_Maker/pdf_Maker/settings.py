@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'pdf_Maker',
-    'userData',
+    'user',
     'soyeb_s5',
     'django_multi_mail_backend',
     
