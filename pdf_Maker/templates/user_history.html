@@ -9,8 +9,10 @@
                 <th>Time</th>
                 <th>Your Files</th>
                 <th>Download Your File</th>
+                <th>YOUR File URL</th>
                 <th>Your PDF Files</th>
                 <th>Download Your PDF</th>
+                <th>PDF File URL</th> <!-- Add this header -->
             </tr>
         </thead>
         <tbody>
@@ -20,8 +22,10 @@
                 <td>{{ file.created_at|time:"h:i A" }}</td>
                 <td>{{ file.user_file.name|extract_filename }}</td>
                 <td><a href="{{ file.user_file.url }}" class="btn btn-primary" download>Download</a></td>
+                <td>{{ file.user_file.url }}</td>
                 <td>{{ file.pdf_file.name|extract_filename }}</td>
                 <td><a href="{{ file.pdf_file.url }}" class="btn btn-primary" download>Download</a></td>
+                <td>{{ file.pdf_file.url }}</td> <!-- Print out the URL here -->
             </tr>
             {% endfor %}
         </tbody>

@@ -1,4 +1,4 @@
-from userData.models import userdata
+from user.models import UserInformation
 
 def userInformation(request):
     user_id = request.session.get('user_id',None)
@@ -6,16 +6,16 @@ def userInformation(request):
     
     try:
         if user_id is not None:
-            user_information = userdata.objects.get(pk=user_id)
+            user_information = UserInformation.objects.get(pk=user_id)
         else:
         #     # emergency fix default object
-            user_information = userdata.objects.get(pk=2)
+            user_information = UserInformation.objects.get(pk=1)
             
-            
-    except userdata.DoesNotExist:
-        print('User not found')
+
     except Exception as e:
         print(f'An error occurred: {e}')
+       
+
 
     data = {'user': user_information}
     return data

@@ -53,11 +53,11 @@ def login_view(request):
         password=request.POST.get('pass')
        
         try:
-            user=userdata.objects.get(email=id)
-        except userdata.DoesNotExist:
+            user=UserInformation.objects.get(email=id)
+        except UserInformation.DoesNotExist:
             try:
-                user=userdata.objects.get(username=id)
-            except userdata.DoesNotExist:
+                user=UserInformation.objects.get(username=id)
+            except UserInformation.DoesNotExist:
                 user=None
         if user is not None and check_password(password,user.password):
                 
@@ -76,7 +76,7 @@ def signup_view(request):
     if request.method =='POST':
         email=request.POST.get('uemail')
         #condition for checking if the account is already made by this email or not 
-        hasAccount=userdata.objects.filter(email=email).first()
+        hasAccount=UserInformation.objects.filter(email=email).first()
         if hasAccount is not None:
             return render(request,'login.html',{'error_alreadyAccountExist':True,'email':email})
         
@@ -127,7 +127,7 @@ def otp_view(request):
         user_otp=request.POST.get('otp')
         if user_otp == otp:
             
-            user=userdata(email=email,password=password,name=name,username=username)
+            user=UserInformation(email=email,password=password,name=name,username=username)
             user.save()
            
            
@@ -161,7 +161,7 @@ def forget_password_view(request):
 
         try:
             # Attempt to retrieve user data based on the provided email
-            user_data = userdata.objects.get(email=email)
+            user_data = UserInformation.objects.get(email=email)
             print(user_data.email)  # Debug print to check if the user data is retrieved correctly
 
             # Check if passwords match
@@ -188,7 +188,7 @@ def forget_password_view(request):
 
             # Redirect to OTP verification page
             return redirect('Forget-otp')
-        except userdata.DoesNotExist:
+        except UserInformation.DoesNotExist:
             # User data doesn't exist for the provided email
             return render(request, 'forget_password.html', {'wrongEmail': True})
         except Exception as e:
@@ -203,7 +203,7 @@ def forget_otp_view(request):
         otp_Backend_storage=request.session.get('otp')
         if otp_from_user == otp_Backend_storage:
             email=request.session.get('email')
-            user=userdata.objects.get(email=email)
+            user=UserInformation.objects.get(email=email)
             updated_password=request.session.get('password')
             user.password=updated_password
             user.save()
@@ -223,7 +223,7 @@ def forget_otp_view(request):
 #--------------------------user account operations------------------------------------------#
 def get_user(request):
     user_id=request.session.get('user_id')
-    user=userdata.objects.get(pk=user_id)
+    user=UserInformation.objects.get(pk=user_id)
     return user 
 def profile_view(request):
     error=request.GET.get('errorOccurr',None)
@@ -295,7 +295,7 @@ def delete_account_view(request):
 def user_history_view(request):
     user_id = request.session.get('user_id', None)
     if user_id is not None:
-        user_files = UserFile.objects.filter(user_id=user_id)
+        user_files = UserFileHistory.objects.filter(user_id=user_id)
         return render(request, 'user_history.html', {'user_files': user_files})
     
     return render(request,'user_history.html')
@@ -311,10 +311,10 @@ def isActive(request):
 def store_user_history(request, user_filename, user_file_content, pdf_filename, pdf_content):
     user_id=request.session.get('user_id')
     if user_id:
-        user=userdata.objects.get(pk=user_id)
+        user=UserInformation.objects.get(pk=user_id)
         user_file=ContentFile(user_file_content.getvalue(),name=user_filename)
         pdf_file=ContentFile(pdf_content,name=pdf_filename)
-        UserFile.objects.create(
+        UserFileHistory.objects.create(
             user=user,
             user_file=user_file,
             pdf_file=pdf_file
