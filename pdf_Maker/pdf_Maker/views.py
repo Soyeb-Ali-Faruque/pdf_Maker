@@ -26,12 +26,13 @@ from user.models import UserInformation,UserFileHistory
 #FILE OPERATION MODULES
 from PIL import Image
 from io import BytesIO
+from openpyxl import load_workbook
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.utils import ImageReader
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate, Paragraph  
-#Image as PlatypusImage
+
 
 
 
@@ -187,7 +188,7 @@ def forget_password_view(request):
             )
 
             # Redirect to OTP verification page
-            return redirect('Forget-otp')
+            return redirect('forget_otp')
         except UserInformation.DoesNotExist:
             # User data doesn't exist for the provided email
             return render(request, 'forget_password.html', {'wrongEmail': True})
@@ -408,6 +409,50 @@ def convert_image_to_pdf(file):
     # Set the buffer position to the beginning for reading
     pdf_buffer.seek(0)
     return pdf_buffer.getvalue()
+def excel_to_pdf_view(request):
+    if request.method == 'POST':
+        user_file = request.FILES.get('file')
+        if user_file:
+            pdf_filename=user_file.name.replace('.xlsx', '.pdf')
+            pdf_content=convert_excel_to_pdf(user_file)
+            response = HttpResponse(pdf_content, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
+            return response
+    return render(request, 'file_converter.html', {'file_accept': '.xlsx'})
+            
+        
+def convert_excel_to_pdf(excel_file):
+    # Load the Excel file
+    wb = load_workbook(excel_file)
+
+    # Select the active worksheet
+    ws = wb.active
+
+    # Create a BytesIO object to hold the PDF data
+    pdf_buffer = BytesIO()
+
+    # Create a canvas for PDF generation
+    c = canvas.Canvas(pdf_buffer, pagesize=letter)
+
+    # Iterate through rows and columns to extract data
+    for row in ws.iter_rows(values_only=True):
+        for cell in row:
+            c.drawString(100, 700, str(cell))  # Adjust position as needed
+
+    # Save the PDF content
+    c.save()
+
+    # Reset buffer position to the beginning
+    pdf_buffer.seek(0)
+
+    return pdf_buffer.getvalue()
+
+
+
+
+
+
+
 def compress_image_view(request):
     if request.method == 'POST':
         image_file = request.FILES.get('file')
@@ -488,7 +533,7 @@ def compress_pdf_view(request):
     return render(request,'compress_file.html',{'file_type':'.pdf'})
 
 
- #Feedback
+
 
 
 

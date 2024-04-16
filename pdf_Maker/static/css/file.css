@@ -1,8 +1,10 @@
 
 .file-container  .container {
-    margin-top: 100px;
+    margin-top: 300px;
+    padding-top: 200px;
 }
   
+
 /* Custom style for select option */
 .custom-select {
     appearance: none;

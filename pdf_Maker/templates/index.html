@@ -55,6 +55,8 @@
 </div>
 
 <div class="container">
+
+
   <!-- Text to PDF Conversion -->
   <div class="option">
     <a href="{% url 'text_to_pdf' %}">
@@ -77,7 +79,7 @@
 
   <!-- Excel to PDF Conversion -->
   <div class="option">
-    <a href="">
+    <a href="{% url 'excel_to_pdf' %}">
       <img src="{% static 'img/excel_to_pdf.jpeg' %}" alt="Excel to PDF Icon">
       <div class="content">
         <span>Convert Excel(.xlsx, .xls) to PDF</span>
@@ -104,6 +106,18 @@
       </div>
     </a>
   </div>
+
+
+  <div class="option">
+    <a href="">
+      <img src="{% static 'img/compress_file.jpeg' %}" alt="Compress FILE Icon">
+      <div class="content">
+        <span>Compress your file size</span>
+      </div>
+    </a>
+  </div>
+
+
 </div>
 
 {% endblock %}

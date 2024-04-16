@@ -1,10 +1,9 @@
-
 {% extends 'base.html' %}
 
 {% block content %}
 
-<div class="file-container">
-  <div class="container mt-4">
+<div class="file-container" style="padding-top: 100px;">
+  <div class="container mt-4 d-flex flex-column align-items-center"> <!-- Added flexbox styles -->
     <h2>File Upload Form</h2>
     <form method="post" enctype="multipart/form-data" class="mt-3">
       {% csrf_token %}
@@ -27,4 +26,3 @@
   </div>
 </div>
 {% endblock %}
-
