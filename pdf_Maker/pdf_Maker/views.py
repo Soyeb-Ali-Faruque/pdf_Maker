@@ -48,7 +48,7 @@ def home_view(request):
 
 def login_view(request):
     message_password_updated=request.GET.get('passwordUpdated',False)
-    message_acc_created=request.GET.get('acc_created',False)
+    
     if request.method == 'POST':
         id=request.POST.get('id')
         password=request.POST.get('pass')
@@ -69,7 +69,7 @@ def login_view(request):
                 
             return render(request,'login.html',{'error':True})
      
-    return render(request,'login.html',{'pass_updated':message_password_updated,'acc_created':message_acc_created})
+    return render(request,'login.html',{'pass_updated':message_password_updated})
 def logout_view(request):
     request.session.pop('user_id',None)
     return redirect('home')
@@ -130,6 +130,7 @@ def otp_view(request):
             
             user=UserInformation(email=email,password=password,name=name,username=username)
             user.save()
+            request.session['user_id'] = user.id
            
            
            #sending username password
@@ -145,9 +146,10 @@ def otp_view(request):
             request.session.pop('password',None)
             request.session.pop('email',None)
             request.session.pop('otp',None)
+           
             
-            url='/login/?acc_created=True'
-            return redirect(url)
+          
+            return redirect('home')
 
         
         else:
