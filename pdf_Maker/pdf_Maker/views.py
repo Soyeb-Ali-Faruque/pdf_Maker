@@ -165,11 +165,11 @@ def forget_password_view(request):
         try:
             # Attempt to retrieve user data based on the provided email
             user_data = UserInformation.objects.get(email=email)
-            print(user_data.email)  # Debug print to check if the user data is retrieved correctly
+           
 
-            # Check if passwords match
-            if password != repassword:
-                return render(request, 'forgetpass.html', {'incorrectPassword': True, 'email': email})
+            # # Check if passwords match
+            # if password != repassword:
+            #     return render(request, 'forgetpass.html', {'incorrectPassword': True, 'email': email})
 
             # Generate OTP for verification
             otpValue = ""
@@ -563,3 +563,8 @@ def feedback_view(request):
         )
         return redirect('home')
     return render(request,'feedback.html')
+
+def privacy_policy_view(request):
+    return render(request,'privacy_policy.html')
+def terms_and_conditions_view(request):
+    return render(request,'terms_and_conditions.html')

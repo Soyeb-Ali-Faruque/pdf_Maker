@@ -53,8 +53,10 @@ urlpatterns = [
     path('compress_image/', views.compress_image_view, name='compress_image'),
     path('compress_pdf/', views.compress_pdf_view, name='compress_pdf'),
 
-    # Feedback
-    path('feedback/', views.feedback_view, name='feedback')
+    # Feedback and policy
+    path('feedback/', views.feedback_view, name='feedback'),
+    path('privacy_policy/',views.privacy_policy_view,name='privacy_policy'),
+     path('terms_and_conditions/',views.terms_and_conditions_view,name='terms_and_conditions'),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
