@@ -1,21 +1,33 @@
-function chooseProfilePicture() {
-    document.getElementById('profile-picture-input').click();
-}
-
-function displayFileName(input) {
-    var fileName = input.value.split('\\').pop();  // Display the selected file name, adjust as needed
-    alert('Selected file: ' + fileName);
-    
-    // Optionally, you can submit the form programmatically after choosing the file
-    document.getElementById('profile-picture-form').submit();
-}
-
-
-function toggleProfilePicture() {
-    var profilePicture = document.getElementById("profile-picture");
-    if (profilePicture.classList.contains("large")) {
-        profilePicture.classList.remove("large");
-    } else {
-        profilePicture.classList.add("large");
+document.addEventListener('DOMContentLoaded', function () {
+    // Function to trigger file input click and show the upload button
+    function chooseProfilePicture() {
+        document.getElementById('profile-picture-input').click();
+        document.getElementById('upload-button').style.display = 'block'; // Show the upload button
     }
-}
+
+    // Function to display file name and preview the selected image
+    function displayFileName(input) {
+        const file = input.files[0];
+        if (file) {
+            const fileType = file.type.split('/')[0];
+            if (fileType === 'image') {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const profilePicture = document.getElementById('profile-picture');
+                    profilePicture.style.backgroundImage = `url(${e.target.result})`;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                alert('Please select an image file.');
+                input.value = ''; // Clear the file input
+            }
+        }
+    }
+
+    // Event listener for the upload button
+    document.getElementById('upload-button').addEventListener('click', function() {
+        document.getElementById('profile-picture-form').submit();
+    });
+
+    // Your other functions and code specific to your functionality can be added here
+});

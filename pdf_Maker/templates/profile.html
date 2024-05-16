@@ -13,11 +13,25 @@
             {% endif %}
         </div>
         <div class="profile-buttons">
+            
+            
             <form method="post" action="{% url 'update_picture' %}" enctype="multipart/form-data" id="profile-picture-form">
                 {% csrf_token %}
-                <input type="file" name="profile_picture" id="profile-picture-input" style="display: none;" onchange="displayFileName(this)">
-                <button type="button" onclick="chooseProfilePicture()">{% if user.profile_picture %} Change Picture{% else %}upload a photo {% endif %}</button>
+                <input type="file" name="profile_picture" id="profile-picture-input" style="display: none;" accept="image/*" onchange="displayFileName(this)">
+                <button type="button" onclick="chooseProfilePicture()">
+                    {% if user.profile_picture %}
+                        Change Photo
+                    {% else %}
+                        Upload Photo
+                    {% endif %}
+                </button>
+                <button type="submit" style="display: none;" id="upload-button">Upload</button>
             </form>
+            <div id="profile-picture-container" class="profile-picture-container">
+                <div id="profile-picture" class="profile-picture"></div>
+            </div>
+
+
             <form method="post" action="{% url 'remove_picture' %}">
                 {% csrf_token %}
                 <button type="submit" class="remove-picture-button">Remove Picture</button>

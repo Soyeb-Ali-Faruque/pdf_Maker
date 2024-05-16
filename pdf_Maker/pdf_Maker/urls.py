@@ -46,7 +46,7 @@ urlpatterns = [
     path('delete_account/', views.delete_account_view, name='delete_account'),
     path('user_history/', views.user_history_view, name='user_history'),
 
-    # File conversion
+    # File conversion(work need to be finished)
     path('text_to_pdf/', views.text_to_pdf_view, name='text_to_pdf'),
     path('image_to_pdf/', views.img_to_pdf_view, name='image_to_pdf'),
     path('excel_to_pdf/', views.excel_to_pdf_view, name='excel_to_pdf'),
@@ -56,7 +56,7 @@ urlpatterns = [
     # Feedback and policy
     path('feedback/', views.feedback_view, name='feedback'),
     path('privacy_policy/',views.privacy_policy_view,name='privacy_policy'),
-     path('terms_and_conditions/',views.terms_and_conditions_view,name='terms_and_conditions'),
+    path('terms_and_conditions/',views.terms_and_conditions_view,name='terms_and_conditions'),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -161,16 +161,13 @@ def forget_password_view(request):
         email = request.POST.get('email')
         password = request.POST.get('password')
         repassword = request.POST.get('repassword')
-
+        print("before try")
         try:
+            print("inner try")
+            
             # Attempt to retrieve user data based on the provided email
             user_data = UserInformation.objects.get(email=email)
-           
-
-            # # Check if passwords match
-            # if password != repassword:
-            #     return render(request, 'forgetpass.html', {'incorrectPassword': True, 'email': email})
-
+            print("after user object retrieve")
             # Generate OTP for verification
             otpValue = ""
             for i in range(0, 6):
@@ -192,6 +189,7 @@ def forget_password_view(request):
             # Redirect to OTP verification page
             return redirect('forget_otp')
         except UserInformation.DoesNotExist:
+            print("exeption")
             # User data doesn't exist for the provided email
             return render(request, 'forget_password.html', {'wrongEmail': True})
         except Exception as e:
