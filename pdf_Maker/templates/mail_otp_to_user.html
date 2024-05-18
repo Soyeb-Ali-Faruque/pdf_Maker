@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Verify Your PDF Maker Account</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+        .container {
+            width: 80%;
+            max-width: 600px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .logo {
+            font-size: 32px;
+            color: lightsalmon;
+            margin: 0;
+        }
+        .content {
+            font-size: 16px;
+        }
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="logo">PDF Maker</h1>
+        </div>
+        <div class="content">
+            <p>Hi {{ user_name }},</p>
+            <p>Thank you for creating an account with PDF Maker! To ensure the security of your account, we need you to verify your email address.</p>
+            <p><strong>One-Time Password (OTP): {{ otp_code }}</strong></p>
+            <p>Please note: This OTP is valid for {{ valid_minutes }} minutes for your security.</p>
+            <p>Security Tip: Never share your OTP with anyone.</p>
+            <p>Sincerely,</p>
+            <p>The PDF Maker Team</p>
+        </div>
+        <div class="footer">
+            <p>Contact us at: <a href="s5tech.contactme@gmail.com">s5tech.contactme@gmail.com</a></p>
+            <p>© 2024 PDF Maker. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

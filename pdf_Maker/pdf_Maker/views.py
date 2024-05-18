@@ -7,12 +7,16 @@ import os
 from django.conf import settings
 
 #DJANGO MODULES
+
+
 from django.urls import reverse
 from django.contrib import messages
 from django.http import HttpResponse
-from django.core.mail import send_mail
+from django.utils.html import strip_tags
 from django.shortcuts import render,redirect
 from django.core.files.base import ContentFile
+from django.template.loader import render_to_string
+from django.core.mail import send_mail,EmailMultiAlternatives
 from django.contrib.auth.hashers import make_password, check_password
 
 
@@ -45,6 +49,26 @@ def home_view(request):
   
 
 #-----------------user login and sign up and forget login credential-------------------------#
+def otp_verification_mail(name,otpValue,validity,mail_to):
+    context = {
+         'user_name': name,
+         'otp_code': otpValue,
+          'valid_minutes': validity,  
+        }
+    html_message = render_to_string('mail_otp_to_user.html', context)
+    plain_message = strip_tags(html_message)
+    from_email = 'PDF Maker <s5tech.sendmail@gmail.com>'
+    to = mail_to
+    # Send the OTP email
+    email_message = EmailMultiAlternatives(
+        'Verify Your PDF Maker Account', plain_message, from_email, [to]
+        )
+    email_message.attach_alternative(html_message, "text/html")
+    email_message.send()
+    
+    
+      
+
 
 def login_view(request):
     message_password_updated=request.GET.get('passwordUpdated',False)
@@ -76,6 +100,7 @@ def logout_view(request):
 def signup_view(request):
     if request.method =='POST':
         email=request.POST.get('uemail')
+        
         #condition for checking if the account is already made by this email or not 
         hasAccount=UserInformation.objects.filter(email=email).first()
         if hasAccount is not None:
@@ -92,7 +117,7 @@ def signup_view(request):
                 break
             username+=char
         
-        #
+        print("username from signup view  ",username)
         otpValue=""
         for i in range(0,6):
             otpValue+=str(random.randrange(0,9))
@@ -106,11 +131,17 @@ def signup_view(request):
         
        
        #sending otp to the associated mail
-        send_mail(
-            'otp-verification','your otp is {}'.format(otpValue),
-            's5tech.sendmail@gmail.com',[email],
-             fail_silently=False,
-          )
+       #---------------outdated------------------------#
+        # send_mail(
+        #     'otp-verification','your otp is {}'.format(otpValue),
+        #     's5tech.sendmail@gmail.com',[email],
+        #      fail_silently=False,
+        #   )
+        #----------------------------------------------#
+        
+        otp_verification_mail(name,otpValue,3,email)
+        
+        
         
        
         
@@ -118,9 +149,12 @@ def signup_view(request):
     return render(request,'login.html')
 def otp_view(request):
     name=request.session.get('name')
-    username=request.session.get('username')
-    password=make_password(request.session.get('password'))
     email=request.session.get('email')
+    username=request.session.get('username')
+    if email is not None and username is not None:
+        email = email.lower()
+        username = username.lower()
+    password=make_password(request.session.get('password'))  
     otp=request.session.get('otp')
     
  
@@ -131,14 +165,6 @@ def otp_view(request):
             user=UserInformation(email=email,password=password,name=name,username=username)
             user.save()
             request.session['user_id'] = user.id
-           
-           
-           #sending username password
-            send_mail(
-                'your login credential','your username is {} and password is {}'.format(username,request.session.get('password')),
-                's5tech.sendmail@gmail.com',[email],
-                fail_silently=False
-                )
             
             #pop or remove information from session
             request.session.pop('name',None)
@@ -179,12 +205,14 @@ def forget_password_view(request):
             request.session['password'] = make_password(password)
 
             # Sending mail to the user
-            send_mail(
-                'otp-reset your password', 
-                'your otp is {}'.format(otpValue),
-                's5tech.sendmail@gmail.com', [email],
-                fail_silently=False
-            )
+            # send_mail(
+            #     'otp-reset your password', 
+            #     'your otp is {}'.format(otpValue),
+            #     's5tech.sendmail@gmail.com', [email],
+            #     fail_silently=False
+            # )
+            
+            otp_verification_mail(user_data.name,otpValue,3,email)
 
             # Redirect to OTP verification page
             return redirect('forget_otp')
@@ -208,12 +236,13 @@ def forget_otp_view(request):
             updated_password=request.session.get('password')
             user.password=updated_password
             user.save()
+            request.session['user_id'] = user.id
             request.session.pop('otp')
             request.session.pop('email')
             request.session.pop('password')
             
-            url='/login/?passwordUpdated=True'
-            return redirect(url)
+            
+            return redirect('home')
         else:
             return render(request,'otp.html',{'incorrect':True})
             

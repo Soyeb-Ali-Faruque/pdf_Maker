@@ -1,6 +1,6 @@
 // otptimer.js
 document.addEventListener("DOMContentLoaded", function() {
-    const initialCountdownTime = 10; // 2 minutes in seconds
+    const initialCountdownTime = 180; // 2 minutes in seconds
     const homeUrl = '/'; // Change this to the correct home URL
 
     // Function to start the countdown
