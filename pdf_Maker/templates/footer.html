@@ -16,10 +16,12 @@
         <div class="contact" style="display: block;">
             <h3>Contact Me</h3>
             {% for contact in contactMe %}
-            <p>{{contact.contact_way}}: {{contact.contact_details}}</p>
+                {% if "gmail.com" in contact.contact_details %}
+                    <p>{{contact.contact_way}}: <a href="mailto:{{contact.contact_details}}">{{contact.contact_details}}</a></p>
+                {% endif %}
             {% endfor %}
-            
         </div>
+        
         
         
         
