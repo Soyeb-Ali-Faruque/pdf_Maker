@@ -1,5 +1,6 @@
 #PYTHON MODULE
 import random
+import img2pdf
 
 
 #SYSTEM 
@@ -28,12 +29,12 @@ from user.models import UserInformation,UserFileHistory
 
 
 #FILE OPERATION MODULES
-from PIL import Image
+
 from io import BytesIO
+from PIL import Image, ExifTags
 from openpyxl import load_workbook
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
-from reportlab.lib.utils import ImageReader
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate, Paragraph  
 
@@ -356,88 +357,101 @@ def text_to_pdf_view(request):
         user_filename=user_file.name
         user_file_content = BytesIO()
         for chunk in user_file.chunks():
-            user_file_content.write(chunk)
-        
+            user_file_content.write(chunk)     
         if user_file:
             size_limit_kb = 600
             size_limit_bytes = size_limit_kb * 1024
-
             if user_file.size > size_limit_bytes:
                 return render(request, 'pdf.html', {'file_accept': '.txt', 'file_size_exceeded': True})
-
             pdf_content = convert_text_to_pdf(user_file)
             pdf_filename=user_file.name.replace('.txt','.pdf')
-           
-
             if isActive(request):
                 store_user_history(request,user_filename,user_file_content,pdf_filename,pdf_content)
-
             response = HttpResponse(pdf_content, content_type='application/pdf')
             response['Content-Disposition'] = f'attachment; filename="{user_file.name.replace(".txt", ".pdf")}"'
             return response
-
     return render(request, 'file_converter.html', {'file_accept': '.txt'})
 def convert_text_to_pdf(file):
     pdf_buffer = BytesIO()
     pdf = SimpleDocTemplate(pdf_buffer, pagesize=letter)    
     styles = getSampleStyleSheet()    
     story = []
-
-    # Debug print to verify file name
-    print("File Name:", file.name)
-
     if file.name.endswith('.txt'):
         with file.open(mode='r') as txt_content:
             for line in txt_content:
                 story.append(Paragraph(line, styles['Normal']))       
     pdf.build(story)
-
-    # Set buffer position for reading
     pdf_buffer.seek(0)
-
-    # Debug print to verify buffer size
-    print("Buffer Size:", pdf_buffer.getbuffer().nbytes)
-
     return pdf_buffer.getvalue()
 def img_to_pdf_view(request):
     if request.method == 'POST':
-        user_file = request.FILES.get('file')
+        user_file = request.FILES.get('file')       
         if user_file:
-            user_filename = user_file.name
+            user_filename = user_file.name            
             user_file_content = BytesIO()
             for chunk in user_file.chunks():
-                user_file_content.write(chunk)
-            
-            pdf_filename = user_filename.replace('.png', '.pdf').replace('.jpg', '.pdf').replace('.jpeg', '.pdf')
-            pdf_content = convert_image_to_pdf(user_file)
-            
-            if isActive(request) == True:
-                store_user_history(request, user_filename, user_file_content, pdf_filename, pdf_content)
-
-            
+                user_file_content.write(chunk)             
+            pdf_content = convert_image_to_pdf(user_file_content)           
+            pdf_filename = user_filename.rsplit('.', 1)[0] + '.pdf'           
+            if isActive(request):
+                store_user_history(request, user_filename, user_file_content, pdf_filename, pdf_content)           
             response = HttpResponse(pdf_content, content_type='application/pdf')
             response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
             return response
     return render(request, 'file_converter.html', {'file_accept': '.png, .jpg, .jpeg'})
-def convert_image_to_pdf(file):
-    pdf_buffer = BytesIO()
-     # Create a PDF document using reportlab
-    pdf = canvas.Canvas(pdf_buffer)
-    image = Image.open(file)
-    image_reader = ImageReader(image)
-    width, height = image.size
-    if width > height:
-        pdf.setPageSize((width, height))
-        pdf.drawImage(image_reader, 0, 0, width, height)
-    else:
-        pdf.setPageSize(letter)
-        pdf.drawImage(image_reader, 0, 0,width=595.276, height=841.890)
+def convert_image_to_pdf(image_file):
+    """
+    Converts an image file to PDF format.
     
+    Parameters:
+    image_file (BytesIO): A file-like object containing the image to be converted.
     
-    pdf.save()
-    # Set the buffer position to the beginning for reading
-    pdf_buffer.seek(0)
-    return pdf_buffer.getvalue()
+    Returns:
+    bytes: The PDF content as a byte string.
+    
+    img2pdf.ExifOrientationError: Raised when img2pdf encounters invalid rotation
+    information in the Exif metadata of the image.
+    """
+    
+    image_file.seek(0) 
+    
+    try:
+        pdf_content = img2pdf.convert(image_file)
+        return pdf_content
+    except img2pdf.ExifOrientationError:
+        # Handle ExifOrientationError by correcting the image rotation
+        image_file.seek(0)
+        image = Image.open(image_file)
+        
+        # Fixing the orientation based on Exif data
+        try:
+            for orientation in ExifTags.TAGS.keys():
+                if ExifTags.TAGS[orientation] == 'Orientation':
+                    break
+            exif = dict(image._getexif().items())
+            
+            if exif[orientation] == 3:
+                image = image.rotate(180, expand=True)
+            elif exif[orientation] == 6:
+                image = image.rotate(270, expand=True)
+            elif exif[orientation] == 8:
+                image = image.rotate(90, expand=True)
+        except (AttributeError, KeyError, IndexError):
+            # No Exif data or no orientation info
+            pass
+        
+        # Save the corrected image to a BytesIO object
+        corrected_image_content = BytesIO()
+        image.save(corrected_image_content, format=image.format)
+        corrected_image_content.seek(0)
+        
+        # Convert the corrected image content to a PDF
+        pdf_content = img2pdf.convert(corrected_image_content)
+        return pdf_content
+
+
+
+
 def excel_to_pdf_view(request):
     if request.method == 'POST':
         user_file = request.FILES.get('file')
