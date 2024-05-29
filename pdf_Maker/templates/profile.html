@@ -7,30 +7,26 @@
     <div class="profile-section">
         <div class="profile-pic">
             {% if user.profile_picture %}
-                <img src="{{ user.profile_picture.url }}" id="profile-picture" onclick="toggleProfilePicture()">
+                <img src="{{ user.profile_picture.url }}">
             {% else %}
-                <img src="{% static 'img/noprofile.jpg' %}" >
+                <img src="{% static 'img/noprofile.jpg' %}">
             {% endif %}
         </div>
         <div class="profile-buttons">
-            
-            
             <form method="post" action="{% url 'update_picture' %}" enctype="multipart/form-data" id="profile-picture-form">
                 {% csrf_token %}
-                <input type="file" name="profile_picture" id="profile-picture-input" style="display: none;" accept="image/*" onchange="displayFileName(this)">
-                <button type="button" onclick="chooseProfilePicture()">
+                <label for="profile-picture-input" id="upload-button" class="upload-button btn btn-primary">
                     {% if user.profile_picture %}
                         Change Photo
                     {% else %}
                         Upload Photo
                     {% endif %}
-                </button>
-                <button type="submit" style="display: none;" id="upload-button">Upload</button>
+                </label>
+                <input type="file" name="profile_picture" id="profile-picture-input" style="display: none;" accept="image/*" onchange="document.getElementById('profile-picture-form').submit();">
             </form>
-            <div id="profile-picture-container" class="profile-picture-container">
-                <div id="profile-picture" class="profile-picture"></div>
-            </div>
-
+            
+            
+            
 
             <form method="post" action="{% url 'remove_picture' %}">
                 {% csrf_token %}
@@ -38,63 +34,53 @@
             </form>
         </div>
     </div>
- 
     
     <div class="user-details">
         <div class="field">
             {% if error == 'name' %}
-            {% if messages %}
-            <ul class="messages">
-              {% for message in messages %}
-              <li {% if message.tags %} class="{{ message.tags }}"{% endif %} style="color: red;">{{ message }}</li>
-              {% endfor %}
-            </ul>
-          {% endif %}
-          {% endif %}
-           
-          
-                <form method="post" action="{% url 'update_name' %}" class="edit-form">
-                    {% csrf_token %}
-                    <div class="input-group mb-3">
-                    
-                    <input type="text" class="form-control" name='name' placeholder="{{user.name}}">
+                {% if messages %}
+                    <ul class="messages">
+                        {% for message in messages %}
+                            <li {% if message.tags %} class="{{ message.tags }}"{% endif %} style="color: red;">{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endif %}
+            <form method="post" action="{% url 'update_name' %}" class="edit-form">
+                {% csrf_token %}
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" name="name" placeholder="{{ user.name }}">
                     <button class="btn btn-primary" type="submit">Change your Name</button>
-                    </div>
-                </form>
+                </div>
+            </form>
         </div>
         
         <div class="field">
             {% if error == 'username' %}
-            {% if messages %}
-  <ul class="messages">
-    {% for message in messages %}
-      <li {% if message.tags %} class="{{ message.tags }}"{% endif %} style="color: red;">{{ message }}</li>
-    {% endfor %}
-  </ul>
-{% endif %}
-{% endif %}
-
-          
-           
-                <form method="post" action="{% url 'update_username' %}" class="edit-form">
-                    {% csrf_token %}
-                    <div class="input-group mb-3">
-                    <input type="text" class="form-control" name='username' placeholder="{{user.username}}">
-                    <button class="btn btn-primary" type="submit">Change your username</button>
-                    </div>
-                </form>
-            
-            
+                {% if messages %}
+                    <ul class="messages">
+                        {% for message in messages %}
+                            <li {% if message.tags %} class="{{ message.tags }}"{% endif %} style="color: red;">{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endif %}
+            <form method="post" action="{% url 'update_username' %}" class="edit-form">
+                {% csrf_token %}
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" name="username" placeholder="{{ user.username }}">
+                    <button class="btn btn-primary" type="submit">Change your Username</button>
+                </div>
+            </form>
         </div>
-        <div class="field">
 
+        <div class="field">
             <div class="input-group mb-3">
                 <input type="text" class="form-control" value="{{ user.email }}" readonly>
                 <button class="btn btn-primary" type="button">@Email</button>
             </div>
-            
-              
         </div>
+        
         <a href="{% url 'forget_password' %}" class="reset-password-link">Reset Password</a>
         <form method="post" action="{% url 'delete_account' %}">
             {% csrf_token %}

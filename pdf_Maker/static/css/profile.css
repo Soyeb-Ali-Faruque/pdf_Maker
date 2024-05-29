@@ -25,7 +25,6 @@
     border-radius: 50%;
     overflow: hidden;
     margin-right: 20px;
-    
 }
 
 /* Styling for the image inside the circular container */
@@ -34,13 +33,6 @@
     height: 100%; /* Set the height to 100% to cover the circular container */
     object-fit: cover;
     border-radius: 50%; 
-}
-
-
-.profile-pic img.large {
-    width: 200px; /* Adjust the width as needed */
-    height: auto;
-    cursor: pointer;
 }
 
 .profile-buttons {
@@ -68,16 +60,6 @@ button {
     margin-bottom: 20px;
 }
 
-label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 5px;
-}
-
-  
-
-
-
 .reset-password-link {
     color: blue; /* Change the color as needed */
     cursor: pointer;
@@ -95,33 +77,10 @@ label {
     margin-top: 10px;
 }
 
-#profile-picture-form button[type="button"] {
-    background-color: #3498db; /* Choose your desired background color */
-    color: #fff; /* Choose your desired text color */
-    padding: 10px 20px; /* Adjust padding as needed */
-    border: none;
-    cursor: pointer;
-}
-
 .remove-picture-button {
     background-color: #e74c3c; /* Choose your desired background color */
     color: #fff; /* Choose your desired text color */
     padding: 10px 20px; /* Adjust padding as needed */
     border: none;
     cursor: pointer;
-}
-
-
-.profile-picture-container {
-    width: 200px;
-    height: 200px;
-    border-radius: 50%;
-    overflow: hidden;
-}
-
-.profile-picture {
-    width: 100%;
-    height: 100%;
-    background-size: cover;
-    background-position: center;
 }
