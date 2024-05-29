@@ -1,2 +1,3 @@
-db.sqlite3
-pdf_Maker\pdf_Maker\settings.py
+pdf_Maker/db.sqlite3
+pdf_Maker/pdf_Maker/settings.py
+pdf_Maker/pdf_Maker/files
