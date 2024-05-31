@@ -49,6 +49,7 @@ urlpatterns = [
     # File conversion(work need to be finished)
     path('text_to_pdf/', views.text_to_pdf_view, name='text_to_pdf'),
     path('image_to_pdf/', views.img_to_pdf_view, name='image_to_pdf'),
+    path('docx_to_pdf/',views.docx_to_pdf_view,name='docx_to_pdf'),
     path('excel_to_pdf/', views.excel_to_pdf_view, name='excel_to_pdf'),
     path('compress_image/', views.compress_image_view, name='compress_image'),
     path('compress_pdf/', views.compress_pdf_view, name='compress_pdf'),

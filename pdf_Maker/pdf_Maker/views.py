@@ -1,11 +1,14 @@
 #PYTHON MODULE
 import random
 import img2pdf
+from docx2pdf import convert as docx_to_pdf_convert
+
 
 
 #SYSTEM 
 import os
 from django.conf import settings
+from tempfile import NamedTemporaryFile
 
 #DJANGO MODULES
 
@@ -450,7 +453,54 @@ def convert_image_to_pdf(image_file):
         return pdf_content
 
 
+def docx_to_pdf_view(request):
+    if request.method == 'POST':
+        user_file = request.FILES.get('file')
+        if user_file:
+            user_filename = user_file.name
+            
+            # Read the uploaded .docx file into a BytesIO object
+            docx_file_content = BytesIO()
+            for chunk in user_file.chunks():
+                docx_file_content.write(chunk)
+            docx_file_content.seek(0)  # Reset file pointer to the beginning
+            
+            # Convert the .docx file to PDF
+            pdf_file_content = convert_docx_to_pdf(docx_file_content)
+            
+            if isActive(request):
+                pdf_filename = os.path.splitext(user_filename)[0] + '.pdf'
+                store_user_history(request, user_filename, docx_file_content, pdf_filename, pdf_file_content.getvalue())
+            
+            # Create HTTP response with the PDF file
+            response = HttpResponse(pdf_file_content, content_type='application/pdf')
+            pdf_filename = os.path.splitext(user_filename)[0] + '.pdf'
+            response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
+            return response
+    
+    return render(request, 'file_converter.html', {'file_accept': '.docx'})
 
+def convert_docx_to_pdf(docx_file_content):
+    # Use NamedTemporaryFile to create a temporary .docx file
+    with NamedTemporaryFile(delete=False, suffix='.docx') as temp_docx:
+        temp_docx.write(docx_file_content.read())
+        temp_docx.flush()
+        temp_docx_path = temp_docx.name
+    
+    # Create another temporary file for the PDF output
+    with NamedTemporaryFile(delete=False, suffix='.pdf') as temp_pdf:
+        temp_pdf_path = temp_pdf.name
+    
+    # Convert .docx to PDF using the paths of the temporary files
+    docx_to_pdf_convert(temp_docx_path, temp_pdf_path)
+    
+    # Read the converted PDF into a BytesIO object
+    pdf_file_content = BytesIO()
+    with open(temp_pdf_path, 'rb') as pdf_file:
+        pdf_file_content.write(pdf_file.read())
+    pdf_file_content.seek(0)  # Reset file pointer to the beginning
+    
+    return pdf_file_content
 
 def excel_to_pdf_view(request):
     if request.method == 'POST':
