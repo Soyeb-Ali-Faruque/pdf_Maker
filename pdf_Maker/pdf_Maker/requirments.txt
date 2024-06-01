@@ -1,6 +1,0 @@
-img2pdf
-docx2pdf
-django
-pillow
-openpyxl
-reportlab
