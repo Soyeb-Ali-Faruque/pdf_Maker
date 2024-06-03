@@ -33,6 +33,9 @@ from user.models import UserInformation,UserFileHistory
 
 #FILE OPERATION MODULES
 
+from docx import Document
+import mammoth
+import pdfkit
 from io import BytesIO
 from PIL import Image, ExifTags
 from openpyxl import load_workbook
@@ -480,19 +483,42 @@ def docx_to_pdf_view(request):
     
     return render(request, 'file_converter.html', {'file_accept': '.docx'})
 
-def convert_docx_to_pdf(docx_file_content):
-    # Use NamedTemporaryFile to create a temporary .docx file
-    with NamedTemporaryFile(delete=False, suffix='.docx') as temp_docx:
-        temp_docx.write(docx_file_content.read())
-        temp_docx.flush()
-        temp_docx_path = temp_docx.name
+def convert_docx_to_html(docx_file_content):
+    # Load the DOCX file using python-docx
+    docx_stream = BytesIO(docx_file_content.read())
+    doc = Document(docx_stream)
     
-    # Create another temporary file for the PDF output
+    # Extract styles from the document
+    styles = {}
+    for style in doc.styles:
+        style_name = style.name
+        style_definition = {
+            'font': style.font.name if style.font.name else None,
+            'font_size': style.font.size.pt if style.font.size.pt else None,
+            # Add more style attributes as needed
+        }
+        styles[style_name] = style_definition
+    
+    # Convert DOCX to HTML using Mammoth, and apply styles
+    result = mammoth.convert_to_html(docx_stream, styles=styles)
+    html_content = result.value
+    return html_content
+
+def convert_docx_to_pdf(docx_file_content):
+    # Convert DOCX to HTML
+    html_content = convert_docx_to_html(docx_file_content)
+    
+    # Create temporary file for HTML content
+    with NamedTemporaryFile(delete=False, suffix='.html') as temp_html:
+        temp_html.write(html_content.encode('utf-8'))
+        temp_html_path = temp_html.name
+    
+    # Create temporary file for PDF output
     with NamedTemporaryFile(delete=False, suffix='.pdf') as temp_pdf:
         temp_pdf_path = temp_pdf.name
     
-    # Convert .docx to PDF using the paths of the temporary files
-    docx_to_pdf_convert(temp_docx_path, temp_pdf_path)
+    # Convert HTML to PDF using pdfkit
+    pdfkit.from_file(temp_html_path, temp_pdf_path)
     
     # Read the converted PDF into a BytesIO object
     pdf_file_content = BytesIO()
