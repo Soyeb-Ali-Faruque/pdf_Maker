@@ -1,9 +1,7 @@
 #PYTHON MODULE
 import random
-import img2pdf
-from docx2pdf import convert as docx_to_pdf_convert
 
-
+import comtypes.client
 
 #SYSTEM 
 import os
@@ -11,8 +9,6 @@ from django.conf import settings
 from tempfile import NamedTemporaryFile
 
 #DJANGO MODULES
-
-
 from django.urls import reverse
 from django.contrib import messages
 from django.http import HttpResponse
@@ -23,29 +19,21 @@ from django.template.loader import render_to_string
 from django.core.mail import send_mail,EmailMultiAlternatives
 from django.contrib.auth.hashers import make_password, check_password
 
-
-
 #MODELS
 from user.models import UserInformation,UserFileHistory
 
-
-
-
 #FILE OPERATION MODULES
-
-from docx import Document
-import mammoth
 import pdfkit
+import img2pdf
+import pptxtopdf
 from io import BytesIO
 from PIL import Image, ExifTags
 from openpyxl import load_workbook
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
+from docx2pdf import convert as docx_to_pdf_convert
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate, Paragraph  
-
-
-
 
 
 #--------------------------------home page--------------------------------------------------#
@@ -54,8 +42,8 @@ def home_view(request):
     
     return render(request,'index.html')
   
-
 #-----------------user login and sign up and forget login credential-------------------------#
+
 def otp_verification_mail(name,otpValue,validity,mail_to):
     context = {
          'user_name': name,
@@ -72,11 +60,6 @@ def otp_verification_mail(name,otpValue,validity,mail_to):
         )
     email_message.attach_alternative(html_message, "text/html")
     email_message.send()
-    
-    
-      
-
-
 def login_view(request):
     message_password_updated=request.GET.get('passwordUpdated',False)
     
@@ -255,9 +238,8 @@ def forget_otp_view(request):
             
     return render(request,'otp.html')
 
-
-
 #--------------------------user account operations------------------------------------------#
+
 def get_user(request):
     user_id=request.session.get('user_id')
     user=UserInformation.objects.get(pk=user_id)
@@ -337,7 +319,6 @@ def user_history_view(request):
     
     return render(request,'user_history.html')
 
-
 #-----------------------------file conversion-----------------------------------------#
 
 def isActive(request):
@@ -355,8 +336,7 @@ def store_user_history(request, user_filename, user_file_content, pdf_filename, 
             user=user,
             user_file=user_file,
             pdf_file=pdf_file
-        )
-     
+        )    
 def text_to_pdf_view(request):
     if request.method == 'POST':
         user_file = request.FILES.get('file')
@@ -365,10 +345,6 @@ def text_to_pdf_view(request):
         for chunk in user_file.chunks():
             user_file_content.write(chunk)     
         if user_file:
-            size_limit_kb = 600
-            size_limit_bytes = size_limit_kb * 1024
-            if user_file.size > size_limit_bytes:
-                return render(request, 'pdf.html', {'file_accept': '.txt', 'file_size_exceeded': True})
             pdf_content = convert_text_to_pdf(user_file)
             pdf_filename=user_file.name.replace('.txt','.pdf')
             if isActive(request):
@@ -406,15 +382,7 @@ def img_to_pdf_view(request):
             return response
     return render(request, 'file_converter.html', {'file_accept': '.png, .jpg, .jpeg'})
 def convert_image_to_pdf(image_file):
-    """
-    Converts an image file to PDF format.
-    
-    Parameters:
-    image_file (BytesIO): A file-like object containing the image to be converted.
-    
-    Returns:
-    bytes: The PDF content as a byte string.
-    
+    """ 
     img2pdf.ExifOrientationError: Raised when img2pdf encounters invalid rotation
     information in the Exif metadata of the image.
     """
@@ -425,17 +393,13 @@ def convert_image_to_pdf(image_file):
         pdf_content = img2pdf.convert(image_file)
         return pdf_content
     except img2pdf.ExifOrientationError:
-        # Handle ExifOrientationError by correcting the image rotation
         image_file.seek(0)
         image = Image.open(image_file)
-        
-        # Fixing the orientation based on Exif data
         try:
             for orientation in ExifTags.TAGS.keys():
                 if ExifTags.TAGS[orientation] == 'Orientation':
                     break
             exif = dict(image._getexif().items())
-            
             if exif[orientation] == 3:
                 image = image.rotate(180, expand=True)
             elif exif[orientation] == 6:
@@ -443,69 +407,64 @@ def convert_image_to_pdf(image_file):
             elif exif[orientation] == 8:
                 image = image.rotate(90, expand=True)
         except (AttributeError, KeyError, IndexError):
-            # No Exif data or no orientation info
             pass
-        
-        # Save the corrected image to a BytesIO object
         corrected_image_content = BytesIO()
         image.save(corrected_image_content, format=image.format)
         corrected_image_content.seek(0)
-        
-        # Convert the corrected image content to a PDF
         pdf_content = img2pdf.convert(corrected_image_content)
         return pdf_content
-
-
-
 def docx_to_pdf_view(request):
     if request.method == 'POST':
         user_file = request.FILES.get('file')
         if user_file:
             user_filename = user_file.name
-            
-            # Read the uploaded .docx file into a BytesIO object
             docx_file_content = BytesIO()
             for chunk in user_file.chunks():
                 docx_file_content.write(chunk)
-            docx_file_content.seek(0)  # Reset file pointer to the beginning
-            
-            # Convert the .docx file to PDF
-            pdf_file_content = convert_docx_to_pdf(docx_file_content)
-            
+            docx_file_content.seek(0) 
+            pdf_file_content = convert_docx_to_pdf(docx_file_content)       
             if isActive(request):
                 pdf_filename = os.path.splitext(user_filename)[0] + '.pdf'
                 store_user_history(request, user_filename, docx_file_content, pdf_filename, pdf_file_content.getvalue())
-            
-            # Create HTTP response with the PDF file
             response = HttpResponse(pdf_file_content, content_type='application/pdf')
             pdf_filename = os.path.splitext(user_filename)[0] + '.pdf'
             response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
             return response
     
     return render(request, 'file_converter.html', {'file_accept': '.docx'})
-
 def convert_docx_to_pdf(docx_file_content):
-    # Use NamedTemporaryFile to create a temporary .docx file
     with NamedTemporaryFile(delete=False, suffix='.docx') as temp_docx:
         temp_docx.write(docx_file_content.read())
         temp_docx.flush()
         temp_docx_path = temp_docx.name
-    
-    # Create another temporary file for the PDF output
     with NamedTemporaryFile(delete=False, suffix='.pdf') as temp_pdf:
         temp_pdf_path = temp_pdf.name
-    
-    # Convert .docx to PDF using the paths of the temporary files
     docx_to_pdf_convert(temp_docx_path, temp_pdf_path)
-    
-    # Read the converted PDF into a BytesIO object
     pdf_file_content = BytesIO()
     with open(temp_pdf_path, 'rb') as pdf_file:
         pdf_file_content.write(pdf_file.read())
-    pdf_file_content.seek(0)  # Reset file pointer to the beginning
-    
+    pdf_file_content.seek(0)  
     return pdf_file_content
-
+def html_to_pdf_view(request):
+    if request.method == 'POST':
+        if 'file' in request.FILES:
+            user_file = request.FILES['file']
+            user_filename = user_file.name
+            html_file_content = BytesIO()
+            for chunk in user_file.chunks():
+                html_file_content.write(chunk)
+            html_file_content.seek(0) 
+            pdf_file_content = convert_html_to_pdf(html_file_content)         
+            if isActive(request):
+                pdf_filename = os.path.splitext(user_filename)[0] + '.pdf'
+                store_user_history(request, user_filename, html_file_content, pdf_filename, pdf_file_content)
+            response = HttpResponse(pdf_file_content, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
+            return response    
+    return render(request, 'file_converter.html', {'file_accept': '.html'})
+def convert_html_to_pdf(html_file_content):
+    pdf_file_content = pdfkit.from_string(html_file_content.read().decode('utf-8'), False)
+    return pdf_file_content
 def excel_to_pdf_view(request):
     if request.method == 'POST':
         user_file = request.FILES.get('file')
@@ -515,9 +474,7 @@ def excel_to_pdf_view(request):
             response = HttpResponse(pdf_content, content_type='application/pdf')
             response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
             return response
-    return render(request, 'file_converter.html', {'file_accept': '.xlsx'})
-            
-        
+    return render(request, 'file_converter.html', {'file_accept': '.xlsx'})   
 def convert_excel_to_pdf(excel_file):
     # Load the Excel file
     wb = load_workbook(excel_file)
@@ -543,96 +500,87 @@ def convert_excel_to_pdf(excel_file):
     pdf_buffer.seek(0)
 
     return pdf_buffer.getvalue()
-
-
-
-
-
-
-
-def compress_image_view(request):
+def presentation_to_pdf_view(request):
     if request.method == 'POST':
-        image_file = request.FILES.get('file')
-        
-        target_size= int(request.POST.get('target_size')) 
-        unit=request.POST.get('unit')
-        
-        if unit == 'MB':
-            # converting the mb to kb
-            target_size= target_size * 1024
-
-        
-        # Call the function for compression
-        compressed_img = compress_image(image_file, target_size)
-        
-        # Prepare response
-        response = HttpResponse(compressed_img.getvalue(), content_type='image/jpeg')
-        response['Content-Disposition'] = 'attachment; filename="compressed_image.jpg"'
-        return response
-
-    return render(request, 'compress_file.html', {'file_type': '.png, .jpg, .jpeg'})
-def compress_image(file, target_size_kb=300):
-    img = Image.open(file)
-    original_size = img.size[0] * img.size[1] * 3  
-    
-    
-    # Initialize quality parameters
-    min_quality = 0
-    max_quality = 100
-    quality = (min_quality + max_quality) // 2 
-    
-    # Compress the image using binary search
-    while True:
-        # Compress the image
-        compressed_img = BytesIO()
-        img.save(compressed_img, format='JPEG', quality=quality)
-        
-        # Get the size of the compressed image
-        compressed_size = len(compressed_img.getvalue())
-        
-        
-        # Check if the compressed size is within the target range
-        if compressed_size <= target_size_kb * 1024:
-            break  # If compressed size is within target, break the loop
-        else:
-            # Adjust quality based on binary search
-            if compressed_size > target_size_kb * 1024:
-                max_quality = quality - 1
+        user_file = request.FILES.get('file')
+        if user_file:
+            user_filename = user_file.name
+            
+            # Read the uploaded .pptx file into a BytesIO object
+            pptx_file_content = BytesIO()
+            for chunk in user_file.chunks():
+                pptx_file_content.write(chunk)
+            pptx_file_content.seek(0)  # Reset file pointer to the beginning
+            
+            # Convert the .pptx file to PDF
+            pdf_file_content = convert_presentation_to_pdf(pptx_file_content)
+            
+            if pdf_file_content:
+                if isActive(request):
+                    pdf_filename = os.path.splitext(user_filename)[0] + '.pdf'
+                    store_user_history(request, user_filename, pptx_file_content, pdf_filename, pdf_file_content.getvalue())
+                
+                # Create HTTP response with the PDF file
+                response = HttpResponse(pdf_file_content, content_type='application/pdf')
+                pdf_filename = os.path.splitext(user_filename)[0] + '.pdf'
+                response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
+                return response
             else:
-                min_quality = quality + 1
-            
-            # Check if quality becomes too low or too high
-            if min_quality > max_quality:
-                # Compression quality too low, break the loop
-                break
-            
-            # Update quality for next iteration
-            quality = (min_quality + max_quality) // 2
+                # Handle conversion failure
+                print("Failed to convert presentation to PDF.")
+                return HttpResponse("Failed to convert presentation to PDF", status=500)
     
-    return compressed_img
-def compress_pdf_view(request):
-    if request.method == 'POST':
-        pdf_file = request.FILES['file']
-        target_size= int(request.POST.get('target_size')) 
-        unit=request.POST.get('unit')
+    return render(request, 'file_converter.html', {'file_accept': '.pptx'})
+def convert_presentation_to_pdf(pptx_file_content):
+    try:
+        # Initialize COM
+        comtypes.client.CoInitialize()
         
-        if unit == 'MB':
-            # converting the mb to kb
-            target_size *= 1024
+        # Use NamedTemporaryFile to create a temporary .pptx file
+        with NamedTemporaryFile(delete=False, suffix='.pptx') as temp_pptx:
+            temp_pptx.write(pptx_file_content.read())
+            temp_pptx.flush()
+            temp_pptx_path = temp_pptx.name
         
-        # Call the function for compression
-        compressed_pdf = compress_pdf(pdf_file,target_size)
+        print(f"Temporary PPTX file created at {temp_pptx_path}")
         
-        # Prepare response
-        response = HttpResponse(compressed_pdf.getvalue(), content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename="compressed_pdf.pdf"'
-        return response
-    return render(request,'compress_file.html',{'file_type':'.pdf'})
-
-
-
-
-
+        # Create another temporary file for the PDF output
+        with NamedTemporaryFile(delete=False, suffix='.pdf') as temp_pdf:
+            temp_pdf_path = temp_pdf.name
+        
+        print(f"Temporary PDF file created at {temp_pdf_path}")
+        
+        # Convert .pptx to PDF using the paths of the temporary files
+        # Assuming pptxtopdf is a valid conversion function
+        conversion_result = pptxtopdf.convert(temp_pptx_path, temp_pdf_path)
+        
+        print(f"Conversion result: {conversion_result}")
+        
+        # Check if conversion was successful
+        if conversion_result:
+            # Read the converted PDF into a BytesIO object
+            pdf_file_content = BytesIO()
+            with open(temp_pdf_path, 'rb') as pdf_file:
+                pdf_file_content.write(pdf_file.read())
+            pdf_file_content.seek(0)  # Reset file pointer to the beginning
+            
+            print("PDF file content read successfully.")
+            
+            # Clean up temporary files
+            os.remove(temp_pptx_path)
+            os.remove(temp_pdf_path)
+            
+            return pdf_file_content
+        else:
+            # Handle conversion failure
+            print("Conversion failed")
+            return None
+    except Exception as e:
+        print(f"Error during conversion: {e}")
+        return None
+    finally:
+        # Uninitialize COM
+        comtypes.client.CoUninitialize()
 
 #----------------------------Feedback------------------------------------------#
 
@@ -658,7 +606,6 @@ def feedback_view(request):
         )
         return redirect('home')
     return render(request,'feedback.html')
-
 def privacy_policy_view(request):
     return render(request,'privacy_policy.html')
 def terms_and_conditions_view(request):

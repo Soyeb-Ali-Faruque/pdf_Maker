@@ -77,6 +77,17 @@
     </a>
   </div>
 
+  <!-- Word to PDF Conversion -->
+  <div class="option">
+    <a href="{% url 'docx_to_pdf' %}">
+      <img src="{% static 'img/word_to_pdf.jpeg' %}" alt="Word to PDF Icon">
+      <div class="content">
+        <span>Convert Word(.docx, .doc) to PDF</span>
+      </div>
+    </a>
+  </div>
+
+
   <!-- Excel to PDF Conversion -->
   <div class="option">
     <a href="{% url 'excel_to_pdf' %}">
@@ -87,25 +98,31 @@
     </a>
   </div>
 
-  <!-- PowerPoint to PDF Conversion -->
+
+  <!-- HTML to PDF Conversion -->
   <div class="option">
-    <a href="">
-      <img src="{% static 'img/powerpoint_to_pdf.jpeg' %}" alt="PowerPoint to PDF Icon">
+    <a href="{% url 'html_to_pdf' %}">
+      <img src="{% static 'img/html_to_pdf.jpg' %}" alt="HTML to PDF Icon">
       <div class="content">
-        <span>Convert PowerPoint(.pptx, .ppt) to PDF</span>
+        <span>Convert HTML(.html) to PDF</span>
       </div>
     </a>
   </div>
 
-  <!-- Word to PDF Conversion -->
+  <!-- PowerPoint to PDF Conversion -->
   <div class="option">
-    <a href="{% url 'docx_to_pdf' %}">
-      <img src="{% static 'img/word_to_pdf.jpeg' %}" alt="Word to PDF Icon">
+    <a href="{% url 'presentation_to_pdf' %}">
+      <img src="{% static 'img/powerpoint_to_pdf.jpeg' %}" alt="PowerPoint to PDF Icon">
       <div class="content">
-        <span>Convert Word(.docx, .doc) to PDF</span>
+        <span>Convert PowerPoint(.pptx) to PDF</span>
       </div>
     </a>
   </div>
+
+  
+
+
+ 
 
 {% comment %} 
   <div class="option">

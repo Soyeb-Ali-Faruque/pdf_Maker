@@ -51,9 +51,9 @@ urlpatterns = [
     path('image_to_pdf/', views.img_to_pdf_view, name='image_to_pdf'),
     path('docx_to_pdf/',views.docx_to_pdf_view,name='docx_to_pdf'),
     path('excel_to_pdf/', views.excel_to_pdf_view, name='excel_to_pdf'),
-    path('compress_image/', views.compress_image_view, name='compress_image'),
-    path('compress_pdf/', views.compress_pdf_view, name='compress_pdf'),
-
+    path('html_to_pdf/', views.html_to_pdf_view, name='html_to_pdf'),
+    path('presentation_to_pdf/',views.presentation_to_pdf_view,name='presentation_to_pdf'),
+ 
     # Feedback and policy
     path('feedback/', views.feedback_view, name='feedback'),
     path('privacy_policy/',views.privacy_policy_view,name='privacy_policy'),
