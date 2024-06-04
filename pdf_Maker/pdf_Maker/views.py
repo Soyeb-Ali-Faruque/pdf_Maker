@@ -1,6 +1,5 @@
 #PYTHON MODULE
 import random
-
 import comtypes.client
 
 #SYSTEM 
@@ -34,7 +33,6 @@ from reportlab.lib.pagesizes import letter
 from docx2pdf import convert as docx_to_pdf_convert
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate, Paragraph  
-
 
 #--------------------------------home page--------------------------------------------------#
 

@@ -4,3 +4,4 @@ django
 pillow
 openpyxl
 reportlab
+pdfkit
