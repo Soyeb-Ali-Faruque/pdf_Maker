@@ -3,7 +3,7 @@ pdfkit
 img2pdf
 pillow
 reportlab
-docx2pdf
+#System requirments- libreoffice and wkhtmltopdf
 
 
 
