@@ -3,7 +3,7 @@
 {% block content %}
 <div class="container mt-5">
     <h2 class="text-center mb-4" style="margin-top: 110px;">Feedback Page</h2>
-    <form  method="post">
+    <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="mb-3">
             <label for="name" class="form-label">Name:</label>
@@ -39,6 +39,10 @@
         <div class="mb-3">
             <label for="message" class="form-label">Message:</label>
             <textarea id="message" name="message" rows="4" class="form-control" required></textarea>
+        </div>
+        <div class="mb-3">
+            <label for="files" class="form-label">Upload Files:</label>
+            <input type="file" id="files" name="files" class="form-control" multiple>
         </div>
         <button type="submit" class="btn btn-primary">Submit Feedback</button>
     </form>

@@ -430,20 +430,19 @@ def convert_image_to_pdf(image_file):
 def docx_to_pdf_view(request):
     if request.method == 'POST':
         user_file = request.FILES.get('file')
-        if not user_file:
-            return HttpResponseBadRequest("No file uploaded")
-        user_filename = user_file.name
-        user_file_content = BytesIO()
-        for chunk in user_file.chunks():
-            user_file_content.write(chunk)
-        pdf_content = convert_docx_to_pdf(user_file_content)
-        pdf_filename = user_filename.rsplit('.', 1)[0] + '.pdf'
-        pdf_content_bytes = pdf_content.getvalue()
-        if isActive(request):
-            store_user_history(request, user_filename, user_file_content, pdf_filename, pdf_content_bytes)
-        response = HttpResponse(pdf_content_bytes, content_type='application/pdf')
-        response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
-        return response
+        if user_file:
+            user_filename = user_file.name
+            user_file_content = BytesIO()
+            for chunk in user_file.chunks():
+                 user_file_content.write(chunk)
+            pdf_content = convert_docx_to_pdf(user_file_content)
+            pdf_filename = user_filename.rsplit('.', 1)[0] + '.pdf'
+            pdf_content_bytes = pdf_content.getvalue()
+            if isActive(request):
+                store_user_history(request, user_filename, user_file_content, pdf_filename, pdf_content_bytes)
+            response = HttpResponse(pdf_content_bytes, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
+            return response
     return render(request, 'file_converter.html', {'file_accept': '.docx'})
 def convert_docx_to_pdf(docx_content):
     with TemporaryDirectory() as temp_dir:
@@ -463,20 +462,19 @@ def convert_docx_to_pdf(docx_content):
 def excel_to_pdf_view(request):
     if request.method == 'POST':
         user_file = request.FILES.get('file')
-        if not user_file:
-            return HttpResponseBadRequest("No file uploaded")
-        user_filename = user_file.name
-        user_file_content = BytesIO()
-        for chunk in user_file.chunks():
-            user_file_content.write(chunk)
-        pdf_content = convert_excel_to_pdf(user_file_content)
-        pdf_filename = user_filename.rsplit('.', 1)[0] + '.pdf'
-        pdf_content_bytes = pdf_content.getvalue()
-        if isActive(request):
-            store_user_history(request, user_filename, user_file_content, pdf_filename, pdf_content_bytes)
-        response = HttpResponse(pdf_content_bytes, content_type='application/pdf')
-        response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
-        return response
+        if user_file:
+            user_filename = user_file.name
+            user_file_content = BytesIO()
+            for chunk in user_file.chunks():
+                user_file_content.write(chunk)
+            pdf_content = convert_excel_to_pdf(user_file_content)
+            pdf_filename = user_filename.rsplit('.', 1)[0] + '.pdf'
+            pdf_content_bytes = pdf_content.getvalue()
+            if isActive(request):
+                store_user_history(request, user_filename, user_file_content, pdf_filename, pdf_content_bytes)
+            response = HttpResponse(pdf_content_bytes, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
+            return response
     return render(request, 'file_converter.html', {'file_accept': '.xlsx'})
 def convert_excel_to_pdf(excel_content):
     with TemporaryDirectory() as temp_dir:
@@ -496,20 +494,19 @@ def convert_excel_to_pdf(excel_content):
 def powerpoint_to_pdf_view(request):
     if request.method == 'POST':
         user_file = request.FILES.get('file')
-        if not user_file:
-            return HttpResponseBadRequest("No file uploaded")
-        user_filename = user_file.name
-        user_file_content = BytesIO()
-        for chunk in user_file.chunks():
-            user_file_content.write(chunk)
-        pdf_content = convert_powerpoint_to_pdf(user_file_content)
-        pdf_filename = user_filename.rsplit('.', 1)[0] + '.pdf'
-        pdf_content_bytes = pdf_content.getvalue()
-        if isActive(request):
-            store_user_history(request, user_filename, user_file_content, pdf_filename, pdf_content_bytes)
-        response = HttpResponse(pdf_content_bytes, content_type='application/pdf')
-        response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
-        return response
+        if user_file:
+            user_filename = user_file.name
+            user_file_content = BytesIO()
+            for chunk in user_file.chunks():
+                user_file_content.write(chunk)
+            pdf_content = convert_powerpoint_to_pdf(user_file_content)
+            pdf_filename = user_filename.rsplit('.', 1)[0] + '.pdf'
+            pdf_content_bytes = pdf_content.getvalue()
+            if isActive(request):
+                store_user_history(request, user_filename, user_file_content, pdf_filename, pdf_content_bytes)
+            response = HttpResponse(pdf_content_bytes, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
+            return response
     return render(request, 'file_converter.html', {'file_accept': '.pptx'})
 def convert_powerpoint_to_pdf(pptx_content):
     with TemporaryDirectory() as temp_dir:
@@ -529,24 +526,28 @@ def convert_powerpoint_to_pdf(pptx_content):
 
 def feedback_view(request):
     if request.method == 'POST':
-        name=request.POST.get('name')
-        print('name')
-        email=request.POST.get('email')
-       
-        APP='PDF_Maker'
-        admin_gmail='feedback.s5tech@gmail.com'
-        feedback=request.POST.get('feedback')
-        message=request.POST.get('message')
-        
-        send_mail(
-            '{}-feedback'.format(APP),
-            'Name: {}\n\nEmail:{}\n\nfeedback_type: {}\nSubject\n\n\{}'.format(name,email,feedback,message),
-            's5tech.sendmail@gmail.com',
-            [admin_gmail],
-            fail_silently=False,          
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        APP = 'PDF_Maker'
+        admin_gmail = 'feedback.s5tech@gmail.com'
+        feedback_type = request.POST.get('feedback')
+        message = request.POST.get('message')
+        email_subject = f'{APP}-feedback'
+        from_email = 's5tech.sendmail@gmail.com'
+        to_email = [admin_gmail] 
+        text_content = f'Name: {name}\n\nEmail: {email}\n\nFeedback Type: {feedback_type}\n\nMessage: {message}'
+        email_message = EmailMultiAlternatives(
+            email_subject,
+            text_content,
+            from_email,
+            to_email,
         )
+        files = request.FILES.getlist('files')
+        for f in files:
+            email_message.attach(f.name, f.read(), f.content_type)
+        email_message.send(fail_silently=False)
         return redirect('home')
-    return render(request,'feedback.html')
+    return render(request, 'feedback.html')
 def privacy_policy_view(request):
     return render(request,'privacy_policy.html')
 def terms_and_conditions_view(request):
