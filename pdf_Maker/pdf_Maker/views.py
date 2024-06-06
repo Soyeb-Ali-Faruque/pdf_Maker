@@ -10,7 +10,7 @@ from tempfile import TemporaryDirectory
 #DJANGO MODULES
 from django.urls import reverse
 from django.contrib import messages
-from django.http import HttpResponse
+from django.http import HttpResponse,HttpResponseBadRequest
 from django.utils.html import strip_tags
 from django.shortcuts import render,redirect
 from django.core.files.base import ContentFile
@@ -338,7 +338,7 @@ def text_to_pdf_view(request):
         user_file_content = BytesIO()
         for chunk in user_file.chunks():
             user_file_content.write(chunk)     
-        if user_file:
+        if user_file:             
             pdf_content = convert_text_to_pdf(user_file)
             pdf_filename=user_file.name.replace('.txt','.pdf')
             if isActive(request):
@@ -361,7 +361,8 @@ def convert_text_to_pdf(file):
     return pdf_buffer.getvalue()
 def html_to_pdf_view(request):
     if request.method == 'POST':
-        if 'file' in request.FILES:
+        user_file = request.FILES.get('file') 
+        if user_file:
             user_file = request.FILES['file']
             user_filename = user_file.name
             html_file_content = BytesIO()

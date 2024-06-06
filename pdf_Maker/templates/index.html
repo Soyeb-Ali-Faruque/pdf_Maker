@@ -52,6 +52,9 @@
 <div style="margin-top: 100px; text-align: center;">
   <h2>Welcome to PDF Maker!</h2>
   <p>Create and manage your PDFs with ease.</p>
+  {% if not request.session.user_id %}
+  <p>Create an account to access file conversion history and download files at any time.</p>
+  {% endif %}
 </div>
 
 <div class="container">
