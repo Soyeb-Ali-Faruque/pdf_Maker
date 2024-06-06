@@ -5,7 +5,7 @@ import random
 #SYSTEM 
 import os
 from django.conf import settings
-from tempfile import NamedTemporaryFile
+from tempfile import TemporaryDirectory
 
 #DJANGO MODULES
 from django.urls import reverse
@@ -27,7 +27,6 @@ import img2pdf
 from io import BytesIO
 from PIL import Image, ExifTags
 from reportlab.lib.pagesizes import letter
-from docx2pdf import convert as docx_to_pdf_convert
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate, Paragraph  
 
@@ -512,7 +511,6 @@ def powerpoint_to_pdf_view(request):
         response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
         return response
     return render(request, 'file_converter.html', {'file_accept': '.pptx'})
-
 def convert_powerpoint_to_pdf(pptx_content):
     with TemporaryDirectory() as temp_dir:
         pptx_path = os.path.join(temp_dir, 'input.pptx')
