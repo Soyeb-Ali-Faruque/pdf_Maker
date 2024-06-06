@@ -360,6 +360,26 @@ def convert_text_to_pdf(file):
     pdf.build(story)
     pdf_buffer.seek(0)
     return pdf_buffer.getvalue()
+def html_to_pdf_view(request):
+    if request.method == 'POST':
+        if 'file' in request.FILES:
+            user_file = request.FILES['file']
+            user_filename = user_file.name
+            html_file_content = BytesIO()
+            for chunk in user_file.chunks():
+                html_file_content.write(chunk)
+            html_file_content.seek(0) 
+            pdf_file_content = convert_html_to_pdf(html_file_content)         
+            if isActive(request):
+                pdf_filename = os.path.splitext(user_filename)[0] + '.pdf'
+                store_user_history(request, user_filename, html_file_content, pdf_filename, pdf_file_content)
+            response = HttpResponse(pdf_file_content, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
+            return response    
+    return render(request, 'file_converter.html', {'file_accept': '.html'})
+def convert_html_to_pdf(html_file_content):
+    pdf_file_content = pdfkit.from_string(html_file_content.read().decode('utf-8'), False)
+    return pdf_file_content
 def img_to_pdf_view(request):
     if request.method == 'POST':
         user_file = request.FILES.get('file')       
@@ -439,26 +459,6 @@ def convert_docx_to_pdf(docx_file_content):
     with open(temp_pdf_path, 'rb') as pdf_file:
         pdf_file_content.write(pdf_file.read())
     pdf_file_content.seek(0)  
-    return pdf_file_content
-def html_to_pdf_view(request):
-    if request.method == 'POST':
-        if 'file' in request.FILES:
-            user_file = request.FILES['file']
-            user_filename = user_file.name
-            html_file_content = BytesIO()
-            for chunk in user_file.chunks():
-                html_file_content.write(chunk)
-            html_file_content.seek(0) 
-            pdf_file_content = convert_html_to_pdf(html_file_content)         
-            if isActive(request):
-                pdf_filename = os.path.splitext(user_filename)[0] + '.pdf'
-                store_user_history(request, user_filename, html_file_content, pdf_filename, pdf_file_content)
-            response = HttpResponse(pdf_file_content, content_type='application/pdf')
-            response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
-            return response    
-    return render(request, 'file_converter.html', {'file_accept': '.html'})
-def convert_html_to_pdf(html_file_content):
-    pdf_file_content = pdfkit.from_string(html_file_content.read().decode('utf-8'), False)
     return pdf_file_content
 def excel_to_pdf_view(request):
     pass 

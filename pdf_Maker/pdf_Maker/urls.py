@@ -48,10 +48,10 @@ urlpatterns = [
 
     # File conversion(work need to be finished)
     path('text_to_pdf/', views.text_to_pdf_view, name='text_to_pdf'),
+    path('html_to_pdf/', views.html_to_pdf_view, name='html_to_pdf'),
     path('image_to_pdf/', views.img_to_pdf_view, name='image_to_pdf'),
     path('docx_to_pdf/',views.docx_to_pdf_view,name='docx_to_pdf'),
     path('excel_to_pdf/', views.excel_to_pdf_view, name='excel_to_pdf'),
-    path('html_to_pdf/', views.html_to_pdf_view, name='html_to_pdf'),
     path('powerpoint_to_pdf/',views.powerpoint_to_pdf_view,name='powerpoint_to_pdf'),
  
     # Feedback and policy
