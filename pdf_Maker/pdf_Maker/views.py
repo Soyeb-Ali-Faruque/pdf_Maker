@@ -1,6 +1,6 @@
 #PYTHON MODULE
 import random
-import comtypes.client
+
 
 #SYSTEM 
 import os
@@ -24,11 +24,8 @@ from user.models import UserInformation,UserFileHistory
 #FILE OPERATION MODULES
 import pdfkit
 import img2pdf
-import pptxtopdf
 from io import BytesIO
 from PIL import Image, ExifTags
-from openpyxl import load_workbook
-from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from docx2pdf import convert as docx_to_pdf_convert
 from reportlab.lib.styles import getSampleStyleSheet
@@ -464,122 +461,13 @@ def convert_html_to_pdf(html_file_content):
     pdf_file_content = pdfkit.from_string(html_file_content.read().decode('utf-8'), False)
     return pdf_file_content
 def excel_to_pdf_view(request):
-    if request.method == 'POST':
-        user_file = request.FILES.get('file')
-        if user_file:
-            pdf_filename=user_file.name.replace('.xlsx', '.pdf')
-            pdf_content=convert_excel_to_pdf(user_file)
-            response = HttpResponse(pdf_content, content_type='application/pdf')
-            response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
-            return response
-    return render(request, 'file_converter.html', {'file_accept': '.xlsx'})   
+    pass 
 def convert_excel_to_pdf(excel_file):
-    # Load the Excel file
-    wb = load_workbook(excel_file)
-
-    # Select the active worksheet
-    ws = wb.active
-
-    # Create a BytesIO object to hold the PDF data
-    pdf_buffer = BytesIO()
-
-    # Create a canvas for PDF generation
-    c = canvas.Canvas(pdf_buffer, pagesize=letter)
-
-    # Iterate through rows and columns to extract data
-    for row in ws.iter_rows(values_only=True):
-        for cell in row:
-            c.drawString(100, 700, str(cell))  # Adjust position as needed
-
-    # Save the PDF content
-    c.save()
-
-    # Reset buffer position to the beginning
-    pdf_buffer.seek(0)
-
-    return pdf_buffer.getvalue()
-def presentation_to_pdf_view(request):
-    if request.method == 'POST':
-        user_file = request.FILES.get('file')
-        if user_file:
-            user_filename = user_file.name
-            
-            # Read the uploaded .pptx file into a BytesIO object
-            pptx_file_content = BytesIO()
-            for chunk in user_file.chunks():
-                pptx_file_content.write(chunk)
-            pptx_file_content.seek(0)  # Reset file pointer to the beginning
-            
-            # Convert the .pptx file to PDF
-            pdf_file_content = convert_presentation_to_pdf(pptx_file_content)
-            
-            if pdf_file_content:
-                if isActive(request):
-                    pdf_filename = os.path.splitext(user_filename)[0] + '.pdf'
-                    store_user_history(request, user_filename, pptx_file_content, pdf_filename, pdf_file_content.getvalue())
-                
-                # Create HTTP response with the PDF file
-                response = HttpResponse(pdf_file_content, content_type='application/pdf')
-                pdf_filename = os.path.splitext(user_filename)[0] + '.pdf'
-                response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
-                return response
-            else:
-                # Handle conversion failure
-                print("Failed to convert presentation to PDF.")
-                return HttpResponse("Failed to convert presentation to PDF", status=500)
-    
-    return render(request, 'file_converter.html', {'file_accept': '.pptx'})
-def convert_presentation_to_pdf(pptx_file_content):
-    try:
-        # Initialize COM
-        comtypes.client.CoInitialize()
-        
-        # Use NamedTemporaryFile to create a temporary .pptx file
-        with NamedTemporaryFile(delete=False, suffix='.pptx') as temp_pptx:
-            temp_pptx.write(pptx_file_content.read())
-            temp_pptx.flush()
-            temp_pptx_path = temp_pptx.name
-        
-        print(f"Temporary PPTX file created at {temp_pptx_path}")
-        
-        # Create another temporary file for the PDF output
-        with NamedTemporaryFile(delete=False, suffix='.pdf') as temp_pdf:
-            temp_pdf_path = temp_pdf.name
-        
-        print(f"Temporary PDF file created at {temp_pdf_path}")
-        
-        # Convert .pptx to PDF using the paths of the temporary files
-        # Assuming pptxtopdf is a valid conversion function
-        conversion_result = pptxtopdf.convert(temp_pptx_path, temp_pdf_path)
-        
-        print(f"Conversion result: {conversion_result}")
-        
-        # Check if conversion was successful
-        if conversion_result:
-            # Read the converted PDF into a BytesIO object
-            pdf_file_content = BytesIO()
-            with open(temp_pdf_path, 'rb') as pdf_file:
-                pdf_file_content.write(pdf_file.read())
-            pdf_file_content.seek(0)  # Reset file pointer to the beginning
-            
-            print("PDF file content read successfully.")
-            
-            # Clean up temporary files
-            os.remove(temp_pptx_path)
-            os.remove(temp_pdf_path)
-            
-            return pdf_file_content
-        else:
-            # Handle conversion failure
-            print("Conversion failed")
-            return None
-    except Exception as e:
-        print(f"Error during conversion: {e}")
-        return None
-    finally:
-        # Uninitialize COM
-        comtypes.client.CoUninitialize()
-
+   pass
+def powerpoint_to_pdf_view(request):
+    pass
+def convert_powerpoint_to_pdf(pptx_file_content):
+    pass
 #----------------------------Feedback------------------------------------------#
 
 def feedback_view(request):
@@ -598,9 +486,7 @@ def feedback_view(request):
             'Name: {}\n\nEmail:{}\n\nfeedback_type: {}\nSubject\n\n\{}'.format(name,email,feedback,message),
             's5tech.sendmail@gmail.com',
             [admin_gmail],
-            fail_silently=False,
-           
-            
+            fail_silently=False,          
         )
         return redirect('home')
     return render(request,'feedback.html')

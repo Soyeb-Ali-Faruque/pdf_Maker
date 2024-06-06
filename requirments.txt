@@ -1,7 +1,10 @@
-img2pdf
-docx2pdf
 django
-pillow
-openpyxl
-reportlab
 pdfkit
+img2pdf
+pillow
+reportlab
+docx2pdf
+
+
+
+
