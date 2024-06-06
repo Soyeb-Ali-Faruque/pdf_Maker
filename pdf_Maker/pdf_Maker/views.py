@@ -431,43 +431,102 @@ def convert_image_to_pdf(image_file):
 def docx_to_pdf_view(request):
     if request.method == 'POST':
         user_file = request.FILES.get('file')
-        if user_file:
-            user_filename = user_file.name
-            docx_file_content = BytesIO()
-            for chunk in user_file.chunks():
-                docx_file_content.write(chunk)
-            docx_file_content.seek(0) 
-            pdf_file_content = convert_docx_to_pdf(docx_file_content)       
-            if isActive(request):
-                pdf_filename = os.path.splitext(user_filename)[0] + '.pdf'
-                store_user_history(request, user_filename, docx_file_content, pdf_filename, pdf_file_content.getvalue())
-            response = HttpResponse(pdf_file_content, content_type='application/pdf')
-            pdf_filename = os.path.splitext(user_filename)[0] + '.pdf'
-            response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
-            return response
-    
+        if not user_file:
+            return HttpResponseBadRequest("No file uploaded")
+        user_filename = user_file.name
+        user_file_content = BytesIO()
+        for chunk in user_file.chunks():
+            user_file_content.write(chunk)
+        pdf_content = convert_docx_to_pdf(user_file_content)
+        pdf_filename = user_filename.rsplit('.', 1)[0] + '.pdf'
+        pdf_content_bytes = pdf_content.getvalue()
+        if isActive(request):
+            store_user_history(request, user_filename, user_file_content, pdf_filename, pdf_content_bytes)
+        response = HttpResponse(pdf_content_bytes, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
+        return response
     return render(request, 'file_converter.html', {'file_accept': '.docx'})
-def convert_docx_to_pdf(docx_file_content):
-    with NamedTemporaryFile(delete=False, suffix='.docx') as temp_docx:
-        temp_docx.write(docx_file_content.read())
-        temp_docx.flush()
-        temp_docx_path = temp_docx.name
-    with NamedTemporaryFile(delete=False, suffix='.pdf') as temp_pdf:
-        temp_pdf_path = temp_pdf.name
-    docx_to_pdf_convert(temp_docx_path, temp_pdf_path)
-    pdf_file_content = BytesIO()
-    with open(temp_pdf_path, 'rb') as pdf_file:
-        pdf_file_content.write(pdf_file.read())
-    pdf_file_content.seek(0)  
-    return pdf_file_content
+def convert_docx_to_pdf(docx_content):
+    with TemporaryDirectory() as temp_dir:
+        docx_path = os.path.join(temp_dir, 'input.docx')
+        with open(docx_path, 'wb') as temp_docx_file:
+            temp_docx_file.write(docx_content.getvalue())
+        subprocess.run([
+            'libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', temp_dir, docx_path
+        ], check=True)
+        pdf_path = os.path.join(temp_dir, 'input.pdf')
+        with open(pdf_path, 'rb') as temp_pdf_file:
+            pdf_content = temp_pdf_file.read()
+        pdf_bytes_io = BytesIO(pdf_content)
+        os.remove(docx_path)
+        os.remove(pdf_path)
+    return pdf_bytes_io
 def excel_to_pdf_view(request):
-    pass 
-def convert_excel_to_pdf(excel_file):
-   pass
+    if request.method == 'POST':
+        user_file = request.FILES.get('file')
+        if not user_file:
+            return HttpResponseBadRequest("No file uploaded")
+        user_filename = user_file.name
+        user_file_content = BytesIO()
+        for chunk in user_file.chunks():
+            user_file_content.write(chunk)
+        pdf_content = convert_excel_to_pdf(user_file_content)
+        pdf_filename = user_filename.rsplit('.', 1)[0] + '.pdf'
+        pdf_content_bytes = pdf_content.getvalue()
+        if isActive(request):
+            store_user_history(request, user_filename, user_file_content, pdf_filename, pdf_content_bytes)
+        response = HttpResponse(pdf_content_bytes, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
+        return response
+    return render(request, 'file_converter.html', {'file_accept': '.xlsx'})
+def convert_excel_to_pdf(excel_content):
+    with TemporaryDirectory() as temp_dir:
+        excel_path = os.path.join(temp_dir, 'input.xlsx')
+        with open(excel_path, 'wb') as temp_excel_file:
+            temp_excel_file.write(excel_content.getvalue())
+        subprocess.run([
+            'libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', temp_dir, excel_path
+        ], check=True)
+        pdf_path = os.path.join(temp_dir, 'input.pdf')
+        with open(pdf_path, 'rb') as temp_pdf_file:
+            pdf_content = temp_pdf_file.read()
+        pdf_bytes_io = BytesIO(pdf_content)
+        os.remove(excel_path)
+        os.remove(pdf_path)
+    return pdf_bytes_io
 def powerpoint_to_pdf_view(request):
-    pass
-def convert_powerpoint_to_pdf(pptx_file_content):
-    pass
+    if request.method == 'POST':
+        user_file = request.FILES.get('file')
+        if not user_file:
+            return HttpResponseBadRequest("No file uploaded")
+        user_filename = user_file.name
+        user_file_content = BytesIO()
+        for chunk in user_file.chunks():
+            user_file_content.write(chunk)
+        pdf_content = convert_powerpoint_to_pdf(user_file_content)
+        pdf_filename = user_filename.rsplit('.', 1)[0] + '.pdf'
+        pdf_content_bytes = pdf_content.getvalue()
+        if isActive(request):
+            store_user_history(request, user_filename, user_file_content, pdf_filename, pdf_content_bytes)
+        response = HttpResponse(pdf_content_bytes, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
+        return response
+    return render(request, 'file_converter.html', {'file_accept': '.pptx'})
+
+def convert_powerpoint_to_pdf(pptx_content):
+    with TemporaryDirectory() as temp_dir:
+        pptx_path = os.path.join(temp_dir, 'input.pptx')
+        with open(pptx_path, 'wb') as temp_pptx_file:
+            temp_pptx_file.write(pptx_content.getvalue())
+        subprocess.run(['libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', temp_dir, pptx_path], check=True)
+        pdf_path = os.path.join(temp_dir, 'input.pdf')
+        with open(pdf_path, 'rb') as temp_pdf_file:
+            pdf_content = temp_pdf_file.read()
+        pdf_bytes_io = BytesIO(pdf_content)
+        os.remove(pptx_path)
+        os.remove(pdf_path)
+    return pdf_bytes_io
+
 #----------------------------Feedback------------------------------------------#
 
 def feedback_view(request):
