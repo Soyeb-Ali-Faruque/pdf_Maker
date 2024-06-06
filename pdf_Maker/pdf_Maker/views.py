@@ -225,7 +225,7 @@ def forget_otp_view(request):
             request.session.pop('email')
             request.session.pop('password')
             
-            
+           
             return redirect('home')
         else:
             return render(request,'otp.html',{'incorrect':True})
@@ -242,18 +242,17 @@ def profile_view(request):
     error=request.GET.get('errorOccurr',None)
     return render(request,'profile.html',{'error':error})
 def update_picture_view(request):
-    user=get_user(request)
-    if request.method=='POST':
+    user = get_user(request)
+    if request.method == 'POST':
         if user.profile_picture:
-            
-            path_to_delete =os.path.join(settings.MEDIA_ROOT, str(user.profile_picture)) 
+            path_to_delete = os.path.join(settings.MEDIA_ROOT, str(user.profile_picture))
             if os.path.exists(path_to_delete):
                 os.remove(path_to_delete)
-        
-        picture=request.FILES.get('profile_picture')
-        user.profile_picture=picture
+        picture = request.FILES.get('profile_picture')
+        if not picture.name.lower().endswith(('jpeg', 'png', 'jpg')):
+            return HttpResponseBadRequest('Only JPEG, PNG, and JPG formats are allowed.')
+        user.profile_picture = picture
         user.save()
-        
     return redirect('profile')
 def remove_picture_view(request):
     user=get_user(request)
@@ -277,22 +276,21 @@ def update_name_view(request):
             user.save()
     return redirect(reverse('profile') + f'?errorOccurr=name')
 def update_username_view(request):
-    user=get_user(request)
+    user = get_user(request)
     if request.method == 'POST':
-        get_username=request.POST.get('username')
+        get_username = request.POST.get('username')
         if len(get_username) < 5:
-            messages.error(request, 'Please enter atlease 5 characters.')
-            return redirect(reverse('profile') + f'?errorOccurr=username')  
-        
+            messages.error(request, 'Please enter at least 5 characters.')
+            return redirect(reverse('profile') + f'?errorOccurr=username')        
         elif ' ' in get_username:
             messages.error(request, 'Username should not contain any spaces.')
-            return redirect(reverse('profile') + f'?errorOccurr=username') 
-    
+            return redirect(reverse('profile') + f'?errorOccurr=username')       
+        elif UserInformation.objects.filter(username=get_username).exists():
+            messages.error(request, 'Username already exists. Please choose a different one.')
+            return redirect(reverse('profile') + f'?errorOccurr=username')    
         else:
-            user.username=get_username
-            user.save()
-            
-    
+            user.username = get_username
+            user.save()  
     return redirect('profile')
 def delete_account_view(request):
     user=get_user(request)
