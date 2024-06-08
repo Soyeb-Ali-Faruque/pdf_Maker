@@ -6,6 +6,7 @@ import random
 import os
 from django.conf import settings
 from tempfile import TemporaryDirectory
+from pptxtopdf import convert
 
 #DJANGO MODULES
 from django.urls import reverse
@@ -29,6 +30,10 @@ from PIL import Image, ExifTags
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate, Paragraph  
+
+
+import win32com.client
+import pythoncom
 
 #--------------------------------home page--------------------------------------------------#
 
@@ -332,11 +337,13 @@ def store_user_history(request, user_filename, user_file_content, pdf_filename, 
 def text_to_pdf_view(request):
     if request.method == 'POST':
         user_file = request.FILES.get('file')
-        user_filename=user_file.name
-        user_file_content = BytesIO()
-        for chunk in user_file.chunks():
-            user_file_content.write(chunk)     
-        if user_file:             
+        if user_file:
+            
+            user_filename=user_file.name
+            user_file_content = BytesIO()
+            for chunk in user_file.chunks():
+                user_file_content.write(chunk)     
+                     
             pdf_content = convert_text_to_pdf(user_file)
             pdf_filename=user_file.name.replace('.txt','.pdf')
             if isActive(request):
@@ -458,6 +465,7 @@ def convert_docx_to_pdf(docx_content):
         os.remove(docx_path)
         os.remove(pdf_path)
     return pdf_bytes_io
+
 def excel_to_pdf_view(request):
     if request.method == 'POST':
         user_file = request.FILES.get('file')
@@ -475,21 +483,41 @@ def excel_to_pdf_view(request):
             response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
             return response
     return render(request, 'file_converter.html', {'file_accept': '.xlsx'})
+
 def convert_excel_to_pdf(excel_content):
     with TemporaryDirectory() as temp_dir:
         excel_path = os.path.join(temp_dir, 'input.xlsx')
         with open(excel_path, 'wb') as temp_excel_file:
             temp_excel_file.write(excel_content.getvalue())
-        subprocess.run([
-            'libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', temp_dir, excel_path
-        ], check=True)
-        pdf_path = os.path.join(temp_dir, 'input.pdf')
+        
+        pdf_path = os.path.join(temp_dir, 'output.pdf')
+        
+        # Initialize COM library
+        pythoncom.CoInitialize()
+        
+        try:
+            # Use win32com to open Excel and convert the file to PDF
+            excel = win32com.client.Dispatch("Excel.Application")
+            excel.Visible = False
+            
+            try:
+                workbook = excel.Workbooks.Open(excel_path)
+                workbook.ExportAsFixedFormat(0, pdf_path)  # 0 corresponds to PDF format
+                workbook.Close(False)
+            finally:
+                excel.Quit()
+        
+        finally:
+            # Ensure that the COM library is uninitialized
+            pythoncom.CoUninitialize()
+        
         with open(pdf_path, 'rb') as temp_pdf_file:
             pdf_content = temp_pdf_file.read()
         pdf_bytes_io = BytesIO(pdf_content)
         os.remove(excel_path)
         os.remove(pdf_path)
     return pdf_bytes_io
+
 def powerpoint_to_pdf_view(request):
     if request.method == 'POST':
         user_file = request.FILES.get('file')
@@ -507,19 +535,41 @@ def powerpoint_to_pdf_view(request):
             response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
             return response
     return render(request, 'file_converter.html', {'file_accept': '.pptx'})
+
 def convert_powerpoint_to_pdf(pptx_content):
     with TemporaryDirectory() as temp_dir:
         pptx_path = os.path.join(temp_dir, 'input.pptx')
         with open(pptx_path, 'wb') as temp_pptx_file:
             temp_pptx_file.write(pptx_content.getvalue())
-        subprocess.run(['libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', temp_dir, pptx_path], check=True)
-        pdf_path = os.path.join(temp_dir, 'input.pdf')
+        
+        pdf_path = os.path.join(temp_dir, 'output.pdf')
+        
+        # Initialize COM library
+        pythoncom.CoInitialize()
+        
+        try:
+            # Use win32com to open PowerPoint and convert the file to PDF
+            powerpoint = win32com.client.DispatchEx("PowerPoint.Application")
+            powerpoint.Visible = True  # This might still be required to ensure it is not visible
+            
+            try:
+                presentation = powerpoint.Presentations.Open(pptx_path, WithWindow=False)
+                presentation.SaveAs(pdf_path, 32)  # 32 corresponds to PDF format
+                presentation.Close()
+            finally:
+                powerpoint.Quit()
+        
+        finally:
+            # Ensure that the COM library is uninitialized
+            pythoncom.CoUninitialize()
+        
         with open(pdf_path, 'rb') as temp_pdf_file:
             pdf_content = temp_pdf_file.read()
         pdf_bytes_io = BytesIO(pdf_content)
         os.remove(pptx_path)
         os.remove(pdf_path)
     return pdf_bytes_io
+
 
 #----------------------------Feedback------------------------------------------#
 
