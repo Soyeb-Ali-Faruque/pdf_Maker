@@ -28,6 +28,7 @@ import img2pdf
 from io import BytesIO
 from PIL import Image, ExifTags
 from reportlab.lib.pagesizes import letter
+from docx2pdf import convert as docx_to_pdf_convert
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate, Paragraph  
 
