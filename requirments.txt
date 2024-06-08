@@ -1,10 +1,15 @@
-django
+Django
 pdfkit
 img2pdf
-pillow
+Pillow
 reportlab
-#System requirments- libreoffice and wkhtmltopdf
+docx2pdf
+pywin32
 
 
 
-
+#Additional Requirements: Microsoft Office and wkhtmltopdf
+#Check wkhtmltopdf installation: open cmd and type wkhtmltopdf --version
+#Download wkhtmltopdf if not on your system: https://wkhtmltopdf.org/downloads.html
+#Set up wkhtmltopdf executable in the environment variable PATH: C:\Program Files\wkhtmltopdf\bin  by default location but check the path correctly 
+#After download, place the wkhtmltopdf in the Program Files folder accordingly

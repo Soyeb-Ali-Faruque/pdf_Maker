@@ -5,8 +5,8 @@ import random
 #SYSTEM 
 import os
 from django.conf import settings
-from tempfile import TemporaryDirectory
-from pptxtopdf import convert
+from tempfile import TemporaryDirectory,NamedTemporaryFile
+
 
 #DJANGO MODULES
 from django.urls import reverse
@@ -369,15 +369,15 @@ def html_to_pdf_view(request):
     if request.method == 'POST':
         user_file = request.FILES.get('file') 
         if user_file:
-            user_file = request.FILES['file']
             user_filename = user_file.name
             html_file_content = BytesIO()
             for chunk in user_file.chunks():
                 html_file_content.write(chunk)
             html_file_content.seek(0) 
-            pdf_file_content = convert_html_to_pdf(html_file_content)         
+            pdf_file_content = convert_html_to_pdf(html_file_content)     
+            pdf_filename = os.path.splitext(user_filename)[0] + '.pdf'    
             if isActive(request):
-                pdf_filename = os.path.splitext(user_filename)[0] + '.pdf'
+                
                 store_user_history(request, user_filename, html_file_content, pdf_filename, pdf_file_content)
             response = HttpResponse(pdf_file_content, content_type='application/pdf')
             response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
@@ -454,18 +454,22 @@ def docx_to_pdf_view(request):
     
     return render(request, 'file_converter.html', {'file_accept': '.docx'})
 def convert_docx_to_pdf(docx_file_content):
-    with NamedTemporaryFile(delete=False, suffix='.docx') as temp_docx:
-        temp_docx.write(docx_file_content.read())
-        temp_docx.flush()
-        temp_docx_path = temp_docx.name
-    with NamedTemporaryFile(delete=False, suffix='.pdf') as temp_pdf:
-        temp_pdf_path = temp_pdf.name
-    docx_to_pdf_convert(temp_docx_path, temp_pdf_path)
-    pdf_file_content = BytesIO()
-    with open(temp_pdf_path, 'rb') as pdf_file:
-        pdf_file_content.write(pdf_file.read())
-    pdf_file_content.seek(0)  
-    return pdf_file_content
+    pythoncom.CoInitialize()  # Initialize the COM library
+    try:
+        with NamedTemporaryFile(delete=False, suffix='.docx') as temp_docx:
+            temp_docx.write(docx_file_content.read())
+            temp_docx.flush()
+            temp_docx_path = temp_docx.name
+        with NamedTemporaryFile(delete=False, suffix='.pdf') as temp_pdf:
+            temp_pdf_path = temp_pdf.name
+        docx_to_pdf_convert(temp_docx_path, temp_pdf_path)
+        pdf_file_content = BytesIO()
+        with open(temp_pdf_path, 'rb') as pdf_file:
+            pdf_file_content.write(pdf_file.read())
+        pdf_file_content.seek(0)
+        return pdf_file_content
+    finally:
+        pythoncom.CoUninitialize()  
 
 def excel_to_pdf_view(request):
     if request.method == 'POST':
