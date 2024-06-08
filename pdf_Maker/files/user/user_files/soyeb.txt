@@ -1,5 +1,0 @@
-Total amount: 15
-The list of money
-1  5
-2  5
-3  5
