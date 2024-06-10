@@ -114,7 +114,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
 
@@ -136,12 +136,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'files')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # STATICFILES_DIRS=[os.path.join(BASE_DIR,'static')]
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST='smtp.gmail.com'
-EMAIL_PORT=587
-EMAIL_HOST_USER='s5tech.sendmail@gmail.com'
-EMAIL_HOST_PASSWORD='xfta ejlz ceox plaa'
-EMAIL_USE_TLS=True
+
 
 
 

@@ -47,6 +47,108 @@
   .option:hover .content {
     opacity: 1; /* Show content on hover */
   }
+  
+  .custom-button {
+    position: relative;
+    background: #d3d3d3; /* White background */
+    color: #000; /* Black text */
+    text-decoration: none;
+    text-transform: uppercase;
+    border: 2px solid transparent;
+    letter-spacing: 0.1rem;
+    font-size: 1rem;
+    padding: 1rem 3rem;
+    transition: 0.2s;
+  }
+  
+  .custom-button:hover {
+    letter-spacing: 0.2rem;
+    padding: 1.1rem 3.1rem;
+  }
+  
+  #imagesButton:hover {
+    border-color: red; /* Red border on hover */
+  }
+  
+  #imagesButton:hover i::before,
+  #imagesButton:hover i::after {
+    border-color: red; /* Red border on hover */
+  }
+  
+  #docxButton:hover {
+    border-color: blue; /* Blue border on hover */
+  }
+  
+  #docxButton:hover i::before,
+  #docxButton:hover i::after {
+    border-color: blue; /* Blue border on hover */
+  }
+  
+  .custom-button::before {
+    content: "";
+    position: absolute;
+    inset: 2px;
+    background: #fff; /* White background inside */
+  }
+  
+  .custom-button span {
+    position: relative;
+    z-index: 1;
+  }
+  
+  .custom-button i {
+    position: absolute;
+    inset: 0;
+    display: block;
+  }
+  
+  .custom-button i::before {
+    content: "";
+    position: absolute;
+    width: 10px;
+    height: 2px;
+    left: 80%;
+    top: -2px;
+    border: 2px solid transparent;
+    background: #fff; /* White background inside */
+    transition: 0.2s;
+  }
+  
+  .custom-button:hover i::before {
+    width: 15px;
+    left: 20%;
+    animation: move 3s infinite;
+  }
+  
+  .custom-button i::after {
+    content: "";
+    position: absolute;
+    width: 10px;
+    height: 2px;
+    left: 20%;
+    bottom: -2px;
+    border: 2px solid transparent;
+    background: #fff; /* White background inside */
+    transition: 0.2s;
+  }
+  
+  .custom-button:hover i::after {
+    width: 15px;
+    left: 80%;
+    animation: move 3s infinite;
+  }
+  
+  @keyframes move {
+    0% {
+      transform: translateX(0);
+    }
+    50% {
+      transform: translateX(5px);
+    }
+    100% {
+      transform: translateX(0);
+    }
+  }
 </style>
 
 <div style="margin-top: 100px; text-align: center;">
@@ -58,7 +160,6 @@
 </div>
 
 <div class="container">
-
 
   <!-- Text to PDF Conversion -->
   <div class="option">
@@ -120,5 +221,24 @@
     </a>
   </div>
 </div>
+
+<div style="margin-top: 50px; text-align: center;">
+  <h3>Advanced Conversion</h3>
+</div>
+
+<div class="container">
+  <!-- Multiple Images to PDF Conversion -->
+  <button id="imagesButton" class="custom-button" style="--clr:red;" onclick="window.location.href='{% url 'images_to_pdf' %}'">
+    <span>Convert Multiple Images (.png, .jpg, .jpeg) to PDF</span><i></i>
+  </button>
+   <!-- Multiple Documents to PDF Conversion -->
+  <button id="docxButton" class="custom-button" style="--clr:blue;" onclick="window.location.href='{% url 'docx_to_pdf' %}'">
+    <span>Convert Multiple Docx files (.docx) to PDF</span><i></i>
+  </button>
+</div>
+
+
+
+
 
 {% endblock %}

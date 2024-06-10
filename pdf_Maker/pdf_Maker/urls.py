@@ -53,6 +53,7 @@ urlpatterns = [
     path('docx_to_pdf/',views.docx_to_pdf_view,name='docx_to_pdf'),
     path('excel_to_pdf/', views.excel_to_pdf_view, name='excel_to_pdf'),
     path('powerpoint_to_pdf/',views.powerpoint_to_pdf_view,name='powerpoint_to_pdf'),
+    path('images_to_pdf/', views.imgs_to_pdf_view, name= 'images_to_pdf'),
  
     # Feedback and policy
     path('feedback/', views.feedback_view, name='feedback'),
