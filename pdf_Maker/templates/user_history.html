@@ -20,13 +20,18 @@
                 <tr>
                     <td>{{ file.created_at|date:"Y-m-d" }}</td>
                     <td>{{ file.created_at|time:"h:i A" }}</td>
-                    <td>{{ file.user_file.name|extract_filename }}</td>
-                    <td><a href="{{ file.user_file.url }}" class="btn btn-primary" download>Download</a></td>
+                    {% if file.user_file %}
+                        <td>{{ file.user_file.name|extract_filename }}</td>
+                        <td><a href="{{ file.user_file.url }}" class="btn btn-primary" download>Download</a></td>
+                    {% else %}
+                        <td colspan="2">This is a multiple file PDF.We cannot store your files except PDF</td>
+                    {% endif %}
                     <td>{{ file.pdf_file.name|extract_filename }}</td>
                     <td><a href="{{ file.pdf_file.url }}" class="btn btn-primary" download>Download</a></td>       
                 </tr>
                 {% endfor %}
             </tbody>
+            
         </table>
     </div>
 </div>

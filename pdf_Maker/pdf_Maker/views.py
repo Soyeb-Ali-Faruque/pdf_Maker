@@ -30,6 +30,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate, Paragraph  
 
+from PyPDF2 import PdfReader, PdfWriter
 #--------------------------------home page--------------------------------------------------#
 
 def home_view(request):
@@ -322,13 +323,122 @@ def store_user_history(request, user_filename, user_file_content, pdf_filename, 
     user_id=request.session.get('user_id')
     if user_id:
         user=UserInformation.objects.get(pk=user_id)
-        user_file=ContentFile(user_file_content.getvalue(),name=user_filename)
+        user_file=None
+        if user_file_content is not None:
+            user_file=ContentFile(user_file_content.getvalue(),name=user_filename)
         pdf_file=ContentFile(pdf_content,name=pdf_filename)
         UserFileHistory.objects.create(
             user=user,
             user_file=user_file,
             pdf_file=pdf_file
         )    
+
+
+#################### FIle conversion fucntions ##############################
+def combine_pdfs(pdf_contents):
+    combined_pdf = BytesIO()
+    pdf_writer = PdfWriter()
+
+    for pdf_content in pdf_contents:
+        # Check if the content is bytes, if so, convert it to BytesIO
+        if isinstance(pdf_content, bytes):
+            pdf_content = BytesIO(pdf_content)
+
+        # Ensure it's at the beginning
+        pdf_content.seek(0)
+
+        # Read the PDF content
+        pdf_reader = PdfReader(pdf_content)
+        
+        # Add all pages of this PDF to the writer
+        for page_num in range(len(pdf_reader.pages)):
+            page = pdf_reader.pages[page_num]
+            pdf_writer.add_page(page)
+
+    # Write the combined PDF to the BytesIO object
+    pdf_writer.write(combined_pdf)
+    combined_pdf.seek(0)
+    return combined_pdf.getvalue()
+def convert_html_to_pdf(html_file_content):
+    pdf_file_content = pdfkit.from_string(html_file_content.read().decode('utf-8'), False)
+    return pdf_file_content
+def convert_image_to_pdf(image_file):
+    """ 
+    img2pdf.ExifOrientationError: Raised when img2pdf encounters invalid rotation
+    information in the Exif metadata of the image.
+    """
+    
+    image_file.seek(0) 
+    
+    try:
+        pdf_content = img2pdf.convert(image_file)
+        return pdf_content
+    except img2pdf.ExifOrientationError:
+        image_file.seek(0)
+        image = Image.open(image_file)
+        try:
+            for orientation in ExifTags.TAGS.keys():
+                if ExifTags.TAGS[orientation] == 'Orientation':
+                    break
+            exif = dict(image._getexif().items())
+            if exif[orientation] == 3:
+                image = image.rotate(180, expand=True)
+            elif exif[orientation] == 6:
+                image = image.rotate(270, expand=True)
+            elif exif[orientation] == 8:
+                image = image.rotate(90, expand=True)
+        except (AttributeError, KeyError, IndexError):
+            pass
+        corrected_image_content = BytesIO()
+        image.save(corrected_image_content, format=image.format)
+        corrected_image_content.seek(0)
+        pdf_content = img2pdf.convert(corrected_image_content)
+        return pdf_content
+def convert_docx_to_pdf(docx_content):
+    with TemporaryDirectory() as temp_dir:
+        docx_path = os.path.join(temp_dir, 'input.docx')
+        with open(docx_path, 'wb') as temp_docx_file:
+            temp_docx_file.write(docx_content.getvalue())
+        subprocess.run([
+            'libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', temp_dir, docx_path
+        ], check=True)
+        pdf_path = os.path.join(temp_dir, 'input.pdf')
+        with open(pdf_path, 'rb') as temp_pdf_file:
+            pdf_content = temp_pdf_file.read()
+        pdf_bytes_io = BytesIO(pdf_content)
+        os.remove(docx_path)
+        os.remove(pdf_path)
+    return pdf_bytes_io    
+def convert_excel_to_pdf(excel_content):
+    with TemporaryDirectory() as temp_dir:
+        excel_path = os.path.join(temp_dir, 'input.xlsx')
+        with open(excel_path, 'wb') as temp_excel_file:
+            temp_excel_file.write(excel_content.getvalue())
+        subprocess.run([
+            'libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', temp_dir, excel_path
+        ], check=True)
+        pdf_path = os.path.join(temp_dir, 'input.pdf')
+        with open(pdf_path, 'rb') as temp_pdf_file:
+            pdf_content = temp_pdf_file.read()
+        pdf_bytes_io = BytesIO(pdf_content)
+        os.remove(excel_path)
+        os.remove(pdf_path)
+    return pdf_bytes_io
+def convert_powerpoint_to_pdf(pptx_content):
+    with TemporaryDirectory() as temp_dir:
+        pptx_path = os.path.join(temp_dir, 'input.pptx')
+        with open(pptx_path, 'wb') as temp_pptx_file:
+            temp_pptx_file.write(pptx_content.getvalue())
+        subprocess.run(['libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', temp_dir, pptx_path], check=True)
+        pdf_path = os.path.join(temp_dir, 'input.pdf')
+        with open(pdf_path, 'rb') as temp_pdf_file:
+            pdf_content = temp_pdf_file.read()
+        pdf_bytes_io = BytesIO(pdf_content)
+        os.remove(pptx_path)
+        os.remove(pdf_path)
+    return pdf_bytes_io
+
+##################### File conversion Views ###################################
 def text_to_pdf_view(request):
     if request.method == 'POST':
         user_file = request.FILES.get('file')
@@ -375,9 +485,6 @@ def html_to_pdf_view(request):
             response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
             return response    
     return render(request, 'file_converter.html', {'file_accept': '.html'})
-def convert_html_to_pdf(html_file_content):
-    pdf_file_content = pdfkit.from_string(html_file_content.read().decode('utf-8'), False)
-    return pdf_file_content
 def img_to_pdf_view(request):
     if request.method == 'POST':
         user_file = request.FILES.get('file')       
@@ -394,38 +501,6 @@ def img_to_pdf_view(request):
             response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
             return response
     return render(request, 'file_converter.html', {'file_accept': '.png, .jpg, .jpeg'})
-def convert_image_to_pdf(image_file):
-    """ 
-    img2pdf.ExifOrientationError: Raised when img2pdf encounters invalid rotation
-    information in the Exif metadata of the image.
-    """
-    
-    image_file.seek(0) 
-    
-    try:
-        pdf_content = img2pdf.convert(image_file)
-        return pdf_content
-    except img2pdf.ExifOrientationError:
-        image_file.seek(0)
-        image = Image.open(image_file)
-        try:
-            for orientation in ExifTags.TAGS.keys():
-                if ExifTags.TAGS[orientation] == 'Orientation':
-                    break
-            exif = dict(image._getexif().items())
-            if exif[orientation] == 3:
-                image = image.rotate(180, expand=True)
-            elif exif[orientation] == 6:
-                image = image.rotate(270, expand=True)
-            elif exif[orientation] == 8:
-                image = image.rotate(90, expand=True)
-        except (AttributeError, KeyError, IndexError):
-            pass
-        corrected_image_content = BytesIO()
-        image.save(corrected_image_content, format=image.format)
-        corrected_image_content.seek(0)
-        pdf_content = img2pdf.convert(corrected_image_content)
-        return pdf_content
 def docx_to_pdf_view(request):
     if request.method == 'POST':
         user_file = request.FILES.get('file')
@@ -443,21 +518,6 @@ def docx_to_pdf_view(request):
             response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
             return response
     return render(request, 'file_converter.html', {'file_accept': '.docx'})
-def convert_docx_to_pdf(docx_content):
-    with TemporaryDirectory() as temp_dir:
-        docx_path = os.path.join(temp_dir, 'input.docx')
-        with open(docx_path, 'wb') as temp_docx_file:
-            temp_docx_file.write(docx_content.getvalue())
-        subprocess.run([
-            'libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', temp_dir, docx_path
-        ], check=True)
-        pdf_path = os.path.join(temp_dir, 'input.pdf')
-        with open(pdf_path, 'rb') as temp_pdf_file:
-            pdf_content = temp_pdf_file.read()
-        pdf_bytes_io = BytesIO(pdf_content)
-        os.remove(docx_path)
-        os.remove(pdf_path)
-    return pdf_bytes_io
 def excel_to_pdf_view(request):
     if request.method == 'POST':
         user_file = request.FILES.get('file')
@@ -475,21 +535,6 @@ def excel_to_pdf_view(request):
             response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
             return response
     return render(request, 'file_converter.html', {'file_accept': '.xlsx'})
-def convert_excel_to_pdf(excel_content):
-    with TemporaryDirectory() as temp_dir:
-        excel_path = os.path.join(temp_dir, 'input.xlsx')
-        with open(excel_path, 'wb') as temp_excel_file:
-            temp_excel_file.write(excel_content.getvalue())
-        subprocess.run([
-            'libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', temp_dir, excel_path
-        ], check=True)
-        pdf_path = os.path.join(temp_dir, 'input.pdf')
-        with open(pdf_path, 'rb') as temp_pdf_file:
-            pdf_content = temp_pdf_file.read()
-        pdf_bytes_io = BytesIO(pdf_content)
-        os.remove(excel_path)
-        os.remove(pdf_path)
-    return pdf_bytes_io
 def powerpoint_to_pdf_view(request):
     if request.method == 'POST':
         user_file = request.FILES.get('file')
@@ -507,19 +552,58 @@ def powerpoint_to_pdf_view(request):
             response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
             return response
     return render(request, 'file_converter.html', {'file_accept': '.pptx'})
-def convert_powerpoint_to_pdf(pptx_content):
-    with TemporaryDirectory() as temp_dir:
-        pptx_path = os.path.join(temp_dir, 'input.pptx')
-        with open(pptx_path, 'wb') as temp_pptx_file:
-            temp_pptx_file.write(pptx_content.getvalue())
-        subprocess.run(['libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', temp_dir, pptx_path], check=True)
-        pdf_path = os.path.join(temp_dir, 'input.pdf')
-        with open(pdf_path, 'rb') as temp_pdf_file:
-            pdf_content = temp_pdf_file.read()
-        pdf_bytes_io = BytesIO(pdf_content)
-        os.remove(pptx_path)
-        os.remove(pdf_path)
-    return pdf_bytes_io
+def imgs_to_pdf_view(request):
+    if request.method == 'POST':
+        user_files = request.FILES.getlist('file')
+        if user_files:
+            pdf_contents = []
+            user_filenames = [file.name for file in user_files]
+
+            for user_file in user_files:
+                user_file_content = BytesIO()
+                for chunk in user_file.chunks():
+                    user_file_content.write(chunk)
+                pdf_content = convert_image_to_pdf(user_file_content)
+                pdf_contents.append(pdf_content)
+
+            combined_pdf_content = combine_pdfs(pdf_contents)
+            pdf_filename = 'combined_images.pdf'
+            
+            if isActive(request):
+                store_user_history(request, ', '.join(user_filenames), None, pdf_filename, combined_pdf_content)
+
+            response = HttpResponse(combined_pdf_content, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
+            return response
+            
+    return render(request, 'file_converter.html', {'file_accept': '.png, .jpg, .jpeg', 'allow_multiple': True})
+def docxs_to_pdf_view(request):
+    if request.method == 'POST':
+        user_files = request.FILES.getlist('file')
+        if user_files:
+            pdf_contents = []
+            user_filenames = [file.name for file in user_files]
+
+            for user_file in user_files:
+                user_file_content = BytesIO()
+                for chunk in user_file.chunks():
+                    user_file_content.write(chunk)
+                pdf_content = convert_docx_to_pdf(user_file_content)
+                pdf_contents.append(pdf_content)
+
+            combined_pdf_content = combine_pdfs(pdf_contents)
+            pdf_filename = 'combined_documents.pdf'
+            
+            if isActive(request):
+                store_user_history(request, ', '.join(user_filenames), None, pdf_filename, combined_pdf_content)
+
+            response = HttpResponse(combined_pdf_content, content_type='application/pdf')   
+            response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
+            return response
+            
+    return render(request, 'file_converter.html', {'file_accept': '.docx', 'allow_multiple': True})
+
+
 
 #----------------------------Feedback------------------------------------------#
 
