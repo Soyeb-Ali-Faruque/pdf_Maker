@@ -2,8 +2,9 @@
 import random
 
 
-#SYSTEM 
+#SYSTEM
 import os
+import subprocess
 from django.conf import settings
 from tempfile import TemporaryDirectory
 
@@ -28,21 +29,21 @@ from io import BytesIO
 from PIL import Image, ExifTags
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.platypus import SimpleDocTemplate, Paragraph  
+from reportlab.platypus import SimpleDocTemplate, Paragraph
 
 #--------------------------------home page--------------------------------------------------#
 
 def home_view(request):
-    
+
     return render(request,'index.html')
-  
+
 #-----------------user login and sign up and forget login credential-------------------------#
 
 def otp_verification_mail(name,otpValue,validity,mail_to):
     context = {
          'user_name': name,
          'otp_code': otpValue,
-          'valid_minutes': validity,  
+          'valid_minutes': validity,
         }
     html_message = render_to_string('mail_otp_to_user.html', context)
     plain_message = strip_tags(html_message)
@@ -56,11 +57,11 @@ def otp_verification_mail(name,otpValue,validity,mail_to):
     email_message.send()
 def login_view(request):
     message_password_updated=request.GET.get('passwordUpdated',False)
-    
+
     if request.method == 'POST':
         id=request.POST.get('id')
         password=request.POST.get('pass')
-       
+
         try:
             user=UserInformation.objects.get(email=id)
         except UserInformation.DoesNotExist:
@@ -69,14 +70,14 @@ def login_view(request):
             except UserInformation.DoesNotExist:
                 user=None
         if user is not None and check_password(password,user.password):
-                
+
             request.session['user_id'] = user.id
-            
+
             return redirect('home')
         else:
-                
+
             return render(request,'login.html',{'error':True})
-     
+
     return render(request,'login.html',{'pass_updated':message_password_updated})
 def logout_view(request):
     request.session.pop('user_id',None)
@@ -84,36 +85,36 @@ def logout_view(request):
 def signup_view(request):
     if request.method =='POST':
         email=request.POST.get('uemail')
-        
-        #condition for checking if the account is already made by this email or not 
+
+        #condition for checking if the account is already made by this email or not
         hasAccount=UserInformation.objects.filter(email=email).first()
         if hasAccount is not None:
             return render(request,'login.html',{'error_alreadyAccountExist':True,'email':email})
-        
+
         name=request.POST.get('uname')
         password=request.POST.get('upass')
        # password=make_password(sendPassword)
-        
+
         #username creation
         username=""
         for char in email:
             if char == '@':
                 break
             username+=char
-        
+
         print("username from signup view  ",username)
         otpValue=""
         for i in range(0,6):
             otpValue+=str(random.randrange(0,9))
-        
+
         #session data storation
         request.session['username']=username
         request.session['password']=password
         request.session['name']=name
         request.session['email']=email
         request.session['otp']=otpValue
-        
-       
+
+
        #sending otp to the associated mail
        #---------------outdated------------------------#
         # send_mail(
@@ -122,13 +123,13 @@ def signup_view(request):
         #      fail_silently=False,
         #   )
         #----------------------------------------------#
-        
+
         otp_verification_mail(name,otpValue,3,email)
-        
-        
-        
-       
-        
+
+
+
+
+
         return redirect('signup_otp')
     return render(request,'login.html')
 def otp_view(request):
@@ -138,33 +139,33 @@ def otp_view(request):
     if email is not None and username is not None:
         email = email.lower()
         username = username.lower()
-    password=make_password(request.session.get('password'))  
+    password=make_password(request.session.get('password'))
     otp=request.session.get('otp')
-    
- 
+
+
     if request.method =='POST':
         user_otp=request.POST.get('otp')
         if user_otp == otp:
-            
+
             user=UserInformation(email=email,password=password,name=name,username=username)
             user.save()
             request.session['user_id'] = user.id
-            
+
             #pop or remove information from session
             request.session.pop('name',None)
             request.session.pop('username',None)
             request.session.pop('password',None)
             request.session.pop('email',None)
             request.session.pop('otp',None)
-           
-            
-          
+
+
+
             return redirect('home')
 
-        
+
         else:
             return render(request,'otp.html',{'incorrect':True})
-    return render(request,'otp.html')       
+    return render(request,'otp.html')
 def forget_password_view(request):
     if request.method == 'POST':
         # Get form data from the template
@@ -174,7 +175,7 @@ def forget_password_view(request):
         print("before try")
         try:
             print("inner try")
-            
+
             # Attempt to retrieve user data based on the provided email
             user_data = UserInformation.objects.get(email=email)
             print("after user object retrieve")
@@ -190,12 +191,12 @@ def forget_password_view(request):
 
             # Sending mail to the user
             # send_mail(
-            #     'otp-reset your password', 
+            #     'otp-reset your password',
             #     'your otp is {}'.format(otpValue),
             #     's5tech.sendmail@gmail.com', [email],
             #     fail_silently=False
             # )
-            
+
             otp_verification_mail(user_data.name,otpValue,3,email)
 
             # Redirect to OTP verification page
@@ -224,12 +225,12 @@ def forget_otp_view(request):
             request.session.pop('otp')
             request.session.pop('email')
             request.session.pop('password')
-            
-           
+
+
             return redirect('home')
         else:
             return render(request,'otp.html',{'incorrect':True})
-            
+
     return render(request,'otp.html')
 
 #--------------------------user account operations------------------------------------------#
@@ -237,7 +238,7 @@ def forget_otp_view(request):
 def get_user(request):
     user_id=request.session.get('user_id')
     user=UserInformation.objects.get(pk=user_id)
-    return user 
+    return user
 def profile_view(request):
     error=request.GET.get('errorOccurr',None)
     return render(request,'profile.html',{'error':error})
@@ -270,7 +271,7 @@ def update_name_view(request):
         get_name=request.POST.get('name')
         if len(get_name) < 5:
             messages.error(request, 'Please enter atlease 5 characters.')
-    
+
         else:
             user.name=get_name
             user.save()
@@ -281,25 +282,25 @@ def update_username_view(request):
         get_username = request.POST.get('username')
         if len(get_username) < 5:
             messages.error(request, 'Please enter at least 5 characters.')
-            return redirect(reverse('profile') + f'?errorOccurr=username')        
+            return redirect(reverse('profile') + f'?errorOccurr=username')
         elif ' ' in get_username:
             messages.error(request, 'Username should not contain any spaces.')
-            return redirect(reverse('profile') + f'?errorOccurr=username')       
+            return redirect(reverse('profile') + f'?errorOccurr=username')
         elif UserInformation.objects.filter(username=get_username).exists():
             messages.error(request, 'Username already exists. Please choose a different one.')
-            return redirect(reverse('profile') + f'?errorOccurr=username')    
+            return redirect(reverse('profile') + f'?errorOccurr=username')
         else:
             user.username = get_username
-            user.save()  
+            user.save()
     return redirect('profile')
 def delete_account_view(request):
     user=get_user(request)
     if request.method=='POST':
         password=request.POST.get('password')
         if user is not None and check_password(password,user.password):
-            user.delete()           
+            user.delete()
             return redirect('logout')
-            
+
         else:
             return render(request,'delete_account.html',{'userPassword':True})
     return render(request,'delete_account.html')
@@ -308,7 +309,7 @@ def user_history_view(request):
     if user_id is not None:
         user_files = UserFileHistory.objects.filter(user_id=user_id)
         return render(request, 'user_history.html', {'user_files': user_files})
-    
+
     return render(request,'user_history.html')
 
 #-----------------------------file conversion-----------------------------------------#
@@ -328,15 +329,15 @@ def store_user_history(request, user_filename, user_file_content, pdf_filename, 
             user=user,
             user_file=user_file,
             pdf_file=pdf_file
-        )    
+        )
 def text_to_pdf_view(request):
     if request.method == 'POST':
         user_file = request.FILES.get('file')
         user_filename=user_file.name
         user_file_content = BytesIO()
         for chunk in user_file.chunks():
-            user_file_content.write(chunk)     
-        if user_file:             
+            user_file_content.write(chunk)
+        if user_file:
             pdf_content = convert_text_to_pdf(user_file)
             pdf_filename=user_file.name.replace('.txt','.pdf')
             if isActive(request):
@@ -347,61 +348,61 @@ def text_to_pdf_view(request):
     return render(request, 'file_converter.html', {'file_accept': '.txt'})
 def convert_text_to_pdf(file):
     pdf_buffer = BytesIO()
-    pdf = SimpleDocTemplate(pdf_buffer, pagesize=letter)    
-    styles = getSampleStyleSheet()    
+    pdf = SimpleDocTemplate(pdf_buffer, pagesize=letter)
+    styles = getSampleStyleSheet()
     story = []
     if file.name.endswith('.txt'):
         with file.open(mode='r') as txt_content:
             for line in txt_content:
-                story.append(Paragraph(line, styles['Normal']))       
+                story.append(Paragraph(line, styles['Normal']))
     pdf.build(story)
     pdf_buffer.seek(0)
     return pdf_buffer.getvalue()
 def html_to_pdf_view(request):
     if request.method == 'POST':
-        user_file = request.FILES.get('file') 
+        user_file = request.FILES.get('file')
         if user_file:
             user_file = request.FILES['file']
             user_filename = user_file.name
             html_file_content = BytesIO()
             for chunk in user_file.chunks():
                 html_file_content.write(chunk)
-            html_file_content.seek(0) 
-            pdf_file_content = convert_html_to_pdf(html_file_content)         
+            html_file_content.seek(0)
+            pdf_file_content = convert_html_to_pdf(html_file_content)
             if isActive(request):
                 pdf_filename = os.path.splitext(user_filename)[0] + '.pdf'
                 store_user_history(request, user_filename, html_file_content, pdf_filename, pdf_file_content)
             response = HttpResponse(pdf_file_content, content_type='application/pdf')
             response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
-            return response    
+            return response
     return render(request, 'file_converter.html', {'file_accept': '.html'})
 def convert_html_to_pdf(html_file_content):
     pdf_file_content = pdfkit.from_string(html_file_content.read().decode('utf-8'), False)
     return pdf_file_content
 def img_to_pdf_view(request):
     if request.method == 'POST':
-        user_file = request.FILES.get('file')       
+        user_file = request.FILES.get('file')
         if user_file:
-            user_filename = user_file.name            
+            user_filename = user_file.name
             user_file_content = BytesIO()
             for chunk in user_file.chunks():
-                user_file_content.write(chunk)             
-            pdf_content = convert_image_to_pdf(user_file_content)           
-            pdf_filename = user_filename.rsplit('.', 1)[0] + '.pdf'           
+                user_file_content.write(chunk)
+            pdf_content = convert_image_to_pdf(user_file_content)
+            pdf_filename = user_filename.rsplit('.', 1)[0] + '.pdf'
             if isActive(request):
-                store_user_history(request, user_filename, user_file_content, pdf_filename, pdf_content)           
+                store_user_history(request, user_filename, user_file_content, pdf_filename, pdf_content)
             response = HttpResponse(pdf_content, content_type='application/pdf')
             response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
             return response
     return render(request, 'file_converter.html', {'file_accept': '.png, .jpg, .jpeg'})
 def convert_image_to_pdf(image_file):
-    """ 
+    """
     img2pdf.ExifOrientationError: Raised when img2pdf encounters invalid rotation
     information in the Exif metadata of the image.
     """
-    
-    image_file.seek(0) 
-    
+
+    image_file.seek(0)
+
     try:
         pdf_content = img2pdf.convert(image_file)
         return pdf_content
@@ -533,7 +534,7 @@ def feedback_view(request):
         message = request.POST.get('message')
         email_subject = f'{APP}-feedback'
         from_email = 's5tech.sendmail@gmail.com'
-        to_email = [admin_gmail] 
+        to_email = [admin_gmail]
         text_content = f'Name: {name}\n\nEmail: {email}\n\nFeedback Type: {feedback_type}\n\nMessage: {message}'
         email_message = EmailMultiAlternatives(
             email_subject,

@@ -1,6 +1,6 @@
 <footer class="footer">
     <div class="footer-container">
-               
+
         <div class="important-links">
             <h3>Important Links</h3>
             <ul>
@@ -9,33 +9,33 @@
                 <li><a href="{% url 'admin:index' %}">Admin Login</a></li>
                 <li><a href="{% url 'privacy_policy' %}">Privacy Policy</a></li>
                 <li><a href="{% url 'terms_and_conditions' %}">Terms and Conditions</a></li>
-                
+
             </ul>
         </div>
-        
+
         <div class="contact" style="display: block;">
-            <h3>Contact Me</h3>
+            <h3>Contact US</h3>
             {% for contact in contactMe %}
                 {% if "gmail.com" in contact.contact_details %}
                     <p>{{contact.contact_way}}: <a href="mailto:{{contact.contact_details}}">{{contact.contact_details}}</a></p>
                 {% endif %}
             {% endfor %}
         </div>
-        
-        
-        
-        
+
+
+
+
         <div class="follow">
-            <h3>Follow Me</h3>
+            <h3>Follow US</h3>
             {% for follow in followMe %}
             <a href="{{follow.link}}">
                 <img src="{{follow.image.url}}" alt="{{follow.name}}"/>
             </a>
             {% endfor %}
-            
+
         </div>
     </div>
-    
+
     <div class="copyright">
         <p>&copy; 2024 PDF Maker. All rights reserved.</p>
     </div>
