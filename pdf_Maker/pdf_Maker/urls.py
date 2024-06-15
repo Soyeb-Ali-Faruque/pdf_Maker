@@ -25,10 +25,10 @@ from django.conf.urls.static import static
 urlpatterns = [
     #Admin
     path('admin/', admin.site.urls,name='admin'),
-    
+
     #Home
     path('',views.home_view,name='home'),
-    
+
     # Authentication
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
@@ -53,8 +53,15 @@ urlpatterns = [
     path('docx_to_pdf/',views.docx_to_pdf_view,name='docx_to_pdf'),
     path('excel_to_pdf/', views.excel_to_pdf_view, name='excel_to_pdf'),
     path('powerpoint_to_pdf/',views.powerpoint_to_pdf_view,name='powerpoint_to_pdf'),
+    path('texts_to_pdf/', views.texts_to_pdf_view, name='texts_to_pdf'),
+    path('htmls_to_pdf/', views.htmls_to_pdf_view, name='htmls_to_pdf'),
     path('images_to_pdf/', views.imgs_to_pdf_view, name= 'images_to_pdf'),
- 
+    path('docxs_to_pdf/',views.docxs_to_pdf_view,name='docxs_to_pdf'),
+    path('excels_to_pdf/', views.excels_to_pdf_view, name='excels_to_pdf'),
+    path('powerpoints_to_pdf/',views.powerpoints_to_pdf_view,name='powerpoints_to_pdf'),
+    path('multi_formats_to_pdf/',views.multi_formats_to_pdf_view,name='multi_formats_to_pdf'),
+
+
     # Feedback and policy
     path('feedback/', views.feedback_view, name='feedback'),
     path('privacy_policy/',views.privacy_policy_view,name='privacy_policy'),

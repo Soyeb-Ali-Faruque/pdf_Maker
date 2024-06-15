@@ -27,11 +27,11 @@ import pdfkit
 import img2pdf
 from io import BytesIO
 from PIL import Image, ExifTags
+from PyPDF2 import PdfReader, PdfWriter
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate, Paragraph
 
-from PyPDF2 import PdfReader, PdfWriter
 #--------------------------------home page--------------------------------------------------#
 
 def home_view(request):
@@ -332,10 +332,7 @@ def store_user_history(request, user_filename, user_file_content, pdf_filename, 
             user=user,
             user_file=user_file,
             pdf_file=pdf_file
-<<<<<<< HEAD
         )
-=======
-        )    
 
 
 #################### FIle conversion fucntions ##############################
@@ -353,7 +350,7 @@ def combine_pdfs(pdf_contents):
 
         # Read the PDF content
         pdf_reader = PdfReader(pdf_content)
-        
+
         # Add all pages of this PDF to the writer
         for page_num in range(len(pdf_reader.pages)):
             page = pdf_reader.pages[page_num]
@@ -363,17 +360,29 @@ def combine_pdfs(pdf_contents):
     pdf_writer.write(combined_pdf)
     combined_pdf.seek(0)
     return combined_pdf.getvalue()
+def convert_text_to_pdf(file):
+    pdf_buffer = BytesIO()
+    pdf = SimpleDocTemplate(pdf_buffer, pagesize=letter)
+    styles = getSampleStyleSheet()
+    story = []
+    file.seek(0)
+    txt_content = file.read().decode('utf-8')
+    for line in txt_content.splitlines():
+        story.append(Paragraph(line, styles['Normal']))
+    pdf.build(story)
+    pdf_buffer.seek(0)
+    return pdf_buffer.getvalue()
 def convert_html_to_pdf(html_file_content):
     pdf_file_content = pdfkit.from_string(html_file_content.read().decode('utf-8'), False)
     return pdf_file_content
 def convert_image_to_pdf(image_file):
-    """ 
+    """
     img2pdf.ExifOrientationError: Raised when img2pdf encounters invalid rotation
     information in the Exif metadata of the image.
     """
-    
-    image_file.seek(0) 
-    
+
+    image_file.seek(0)
+
     try:
         pdf_content = img2pdf.convert(image_file)
         return pdf_content
@@ -412,7 +421,7 @@ def convert_docx_to_pdf(docx_content):
         pdf_bytes_io = BytesIO(pdf_content)
         os.remove(docx_path)
         os.remove(pdf_path)
-    return pdf_bytes_io    
+    return pdf_bytes_io
 def convert_excel_to_pdf(excel_content):
     with TemporaryDirectory() as temp_dir:
         excel_path = os.path.join(temp_dir, 'input.xlsx')
@@ -443,7 +452,6 @@ def convert_powerpoint_to_pdf(pptx_content):
     return pdf_bytes_io
 
 ##################### File conversion Views ###################################
->>>>>>> fc6313b51ccff0aeb937a6576e2554a31112a6d1
 def text_to_pdf_view(request):
     if request.method == 'POST':
         user_file = request.FILES.get('file')
@@ -460,18 +468,7 @@ def text_to_pdf_view(request):
             response['Content-Disposition'] = f'attachment; filename="{user_file.name.replace(".txt", ".pdf")}"'
             return response
     return render(request, 'file_converter.html', {'file_accept': '.txt'})
-def convert_text_to_pdf(file):
-    pdf_buffer = BytesIO()
-    pdf = SimpleDocTemplate(pdf_buffer, pagesize=letter)
-    styles = getSampleStyleSheet()
-    story = []
-    if file.name.endswith('.txt'):
-        with file.open(mode='r') as txt_content:
-            for line in txt_content:
-                story.append(Paragraph(line, styles['Normal']))
-    pdf.build(story)
-    pdf_buffer.seek(0)
-    return pdf_buffer.getvalue()
+
 def html_to_pdf_view(request):
     if request.method == 'POST':
         user_file = request.FILES.get('file')
@@ -483,8 +480,8 @@ def html_to_pdf_view(request):
                 html_file_content.write(chunk)
             html_file_content.seek(0)
             pdf_file_content = convert_html_to_pdf(html_file_content)
+            pdf_filename = os.path.splitext(user_filename)[0] + '.pdf'
             if isActive(request):
-                pdf_filename = os.path.splitext(user_filename)[0] + '.pdf'
                 store_user_history(request, user_filename, html_file_content, pdf_filename, pdf_file_content)
             response = HttpResponse(pdf_file_content, content_type='application/pdf')
             response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
@@ -506,41 +503,6 @@ def img_to_pdf_view(request):
             response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
             return response
     return render(request, 'file_converter.html', {'file_accept': '.png, .jpg, .jpeg'})
-<<<<<<< HEAD
-def convert_image_to_pdf(image_file):
-    """
-    img2pdf.ExifOrientationError: Raised when img2pdf encounters invalid rotation
-    information in the Exif metadata of the image.
-    """
-
-    image_file.seek(0)
-
-    try:
-        pdf_content = img2pdf.convert(image_file)
-        return pdf_content
-    except img2pdf.ExifOrientationError:
-        image_file.seek(0)
-        image = Image.open(image_file)
-        try:
-            for orientation in ExifTags.TAGS.keys():
-                if ExifTags.TAGS[orientation] == 'Orientation':
-                    break
-            exif = dict(image._getexif().items())
-            if exif[orientation] == 3:
-                image = image.rotate(180, expand=True)
-            elif exif[orientation] == 6:
-                image = image.rotate(270, expand=True)
-            elif exif[orientation] == 8:
-                image = image.rotate(90, expand=True)
-        except (AttributeError, KeyError, IndexError):
-            pass
-        corrected_image_content = BytesIO()
-        image.save(corrected_image_content, format=image.format)
-        corrected_image_content.seek(0)
-        pdf_content = img2pdf.convert(corrected_image_content)
-        return pdf_content
-=======
->>>>>>> fc6313b51ccff0aeb937a6576e2554a31112a6d1
 def docx_to_pdf_view(request):
     if request.method == 'POST':
         user_file = request.FILES.get('file')
@@ -592,6 +554,56 @@ def powerpoint_to_pdf_view(request):
             response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
             return response
     return render(request, 'file_converter.html', {'file_accept': '.pptx'})
+def texts_to_pdf_view(request):
+    if request.method == 'POST':
+        user_files = request.FILES.getlist('file')
+        if user_files:
+            pdf_contents = []
+            user_filenames = [file.name for file in user_files]
+
+            for user_file in user_files:
+                user_file_content = BytesIO()
+                for chunk in user_file.chunks():
+                    user_file_content.write(chunk)
+                pdf_content = convert_text_to_pdf(user_file_content)
+                pdf_contents.append(pdf_content)
+
+            combined_pdf_content = combine_pdfs(pdf_contents)
+            pdf_filename = 'PDFMaker-generated-document.pdf'
+
+            if isActive(request):
+                store_user_history(request, ', '.join(user_filenames), None, pdf_filename, combined_pdf_content)
+
+            response = HttpResponse(combined_pdf_content, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
+            return response
+
+    return render(request, 'file_converter.html', {'file_accept': '.txt', 'allow_multiple': True})
+def htmls_to_pdf_view(request):
+    if request.method == 'POST':
+        user_files = request.FILES.getlist('file')
+        if user_files:
+            pdf_contents = []
+            user_filenames = [file.name for file in user_files]
+
+            for user_file in user_files:
+                user_file_content = BytesIO()
+                for chunk in user_file.chunks():
+                    user_file_content.write(chunk)
+                pdf_content = convert_html_to_pdf(user_file_content)
+                pdf_contents.append(pdf_content)
+
+            combined_pdf_content = combine_pdfs(pdf_contents)
+            pdf_filename = 'PDFMaker-generated-document.pdf'
+
+            if isActive(request):
+                store_user_history(request, ', '.join(user_filenames), None, pdf_filename, combined_pdf_content)
+
+            response = HttpResponse(combined_pdf_content, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
+            return response
+
+    return render(request, 'file_converter.html', {'file_accept': '.html', 'allow_multiple': True})
 def imgs_to_pdf_view(request):
     if request.method == 'POST':
         user_files = request.FILES.getlist('file')
@@ -607,15 +619,15 @@ def imgs_to_pdf_view(request):
                 pdf_contents.append(pdf_content)
 
             combined_pdf_content = combine_pdfs(pdf_contents)
-            pdf_filename = 'combined_images.pdf'
-            
+            pdf_filename = 'PDFMaker-generated-document.pdf'
+
             if isActive(request):
                 store_user_history(request, ', '.join(user_filenames), None, pdf_filename, combined_pdf_content)
 
             response = HttpResponse(combined_pdf_content, content_type='application/pdf')
             response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
             return response
-            
+
     return render(request, 'file_converter.html', {'file_accept': '.png, .jpg, .jpeg', 'allow_multiple': True})
 def docxs_to_pdf_view(request):
     if request.method == 'POST':
@@ -632,18 +644,110 @@ def docxs_to_pdf_view(request):
                 pdf_contents.append(pdf_content)
 
             combined_pdf_content = combine_pdfs(pdf_contents)
-            pdf_filename = 'combined_documents.pdf'
-            
+            pdf_filename = 'PDFMaker-generated-document.pdf'
+
             if isActive(request):
                 store_user_history(request, ', '.join(user_filenames), None, pdf_filename, combined_pdf_content)
 
-            response = HttpResponse(combined_pdf_content, content_type='application/pdf')   
+            response = HttpResponse(combined_pdf_content, content_type='application/pdf')
             response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
             return response
-            
+
     return render(request, 'file_converter.html', {'file_accept': '.docx', 'allow_multiple': True})
+def excels_to_pdf_view(request):
+    if request.method == 'POST':
+        user_files = request.FILES.getlist('file')
+        if user_files:
+            pdf_contents = []
+            user_filenames = [file.name for file in user_files]
+
+            for user_file in user_files:
+                user_file_content = BytesIO()
+                for chunk in user_file.chunks():
+                    user_file_content.write(chunk)
+                pdf_content = convert_excel_to_pdf(user_file_content)
+                pdf_contents.append(pdf_content)
+
+            combined_pdf_content = combine_pdfs(pdf_contents)
+            pdf_filename = 'PDFMaker-generated-document.pdf'
+
+            if isActive(request):
+                store_user_history(request, ', '.join(user_filenames), None, pdf_filename, combined_pdf_content)
+
+            response = HttpResponse(combined_pdf_content, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
+            return response
+
+    return render(request, 'file_converter.html', {'file_accept': '.xlsx', 'allow_multiple': True})
+def powerpoints_to_pdf_view(request):
+    if request.method == 'POST':
+        user_files = request.FILES.getlist('file')
+        if user_files:
+            pdf_contents = []
+            user_filenames = [file.name for file in user_files]
+
+            for user_file in user_files:
+                user_file_content = BytesIO()
+                for chunk in user_file.chunks():
+                    user_file_content.write(chunk)
+                pdf_content = convert_powerpoint_to_pdf(user_file_content)
+                pdf_contents.append(pdf_content)
+
+            combined_pdf_content = combine_pdfs(pdf_contents)
+            pdf_filename = 'PDFMaker-generated-document.pdf'
+
+            if isActive(request):
+                store_user_history(request, ', '.join(user_filenames), None, pdf_filename, combined_pdf_content)
+
+            response = HttpResponse(combined_pdf_content, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
+            return response
+
+    return render(request, 'file_converter.html', {'file_accept': '.pptx', 'allow_multiple': True})
+
+def multi_formats_to_pdf_view(request):
+    if request.method == 'POST':
+        user_files = request.FILES.getlist('file')
+        if user_files:
+            pdf_contents = []
+            user_filenames = [file.name for file in user_files]
+
+            for user_file in user_files:
+                user_file_content = BytesIO()
+                for chunk in user_file.chunks():
+                    user_file_content.write(chunk)
+
+                file_extension = user_file.name.lower().split('.')[-1]
+
+                if file_extension == 'txt':
+                    pdf_content = convert_text_to_pdf(user_file_content)
+                elif file_extension == 'html':
+                    pdf_content = convert_html_to_pdf(user_file_content)
+                elif file_extension in ['jpg', 'jpeg', 'png']:
+                    pdf_content = convert_image_to_pdf(user_file_content)
+                elif file_extension == 'docx':
+                    pdf_content = convert_docx_to_pdf(user_file_content)
+                elif file_extension == 'xlsx':
+                    pdf_content = convert_excel_to_pdf(user_file_content)
+                elif file_extension == 'pptx':
+                    pdf_content = convert_powerpoint_to_pdf(user_file_content)
+                else:
+                    continue  # Skip unsupported file types
 
 
+                pdf_contents.append(pdf_content)
+
+            combined_pdf_content = combine_pdfs(pdf_contents)
+            pdf_filename = 'PDFMaker-generated-document.pdf'
+
+            if isActive(request):
+                store_user_history(request, ', '.join(user_filenames), None, pdf_filename, combined_pdf_content)
+
+            response = HttpResponse(combined_pdf_content, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
+            return response
+
+    return render(request, 'file_converter.html', {'file_accept': '.docx, .txt, .jpg, .jpeg, .png, .pptx, .xlsx', 'allow_multiple': True})
 
 #----------------------------Feedback------------------------------------------#
 

@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('uploadForm').addEventListener('submit', function(event) {
+
     // Check if a file is selected
     const fileInput = document.getElementById('file');
     const file = fileInput.files[0];
@@ -24,14 +25,14 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('fileTypeError').style.display = 'block';
       event.preventDefault();
       return;
+    } else {
+      // Hide the file type mismatch error message if file type is acceptable
+      document.getElementById('fileTypeError').style.display = 'none';
     }
-
-    // Hide the file type mismatch error message if needed
-    document.getElementById('fileTypeError').style.display = 'none';
 
     // Show the loading message
     document.getElementById('loadingMessage').style.display = 'block';
-    
+
     // Create a simple loading animation
     let dots = 0;
     const loadingDots = document.getElementById('loadingDots');
@@ -45,33 +46,51 @@ document.addEventListener('DOMContentLoaded', function() {
     xhr.open(this.method, this.action, true);
     xhr.responseType = 'blob';
     xhr.onload = function() {
-      if (xhr.status === 200) {
+      if (xhr.status === 200 || xhr.status === 204) {
         document.getElementById('loadingMessage').style.display = 'none';
         document.getElementById('downloadingMessage').style.display = 'block';
 
-        const fileName = xhr.getResponseHeader('Content-Disposition')
-          .split(';')[1]
-          .trim()
-          .split('=')[1]
-          .replace(/"/g, '');
+        const contentDisposition = xhr.getResponseHeader('Content-Disposition');
+        if (contentDisposition) {
+          const fileName = contentDisposition
+            .split(';')[1]
+            .trim()
+            .split('=')[1]
+            .replace(/"/g, '');
 
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(xhr.response);
-        link.download = fileName;  // Set the file name
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(xhr.response);
+          link.download = fileName;  // Set the file name
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
 
-        // Hide the downloading message and show the completed message
-        document.getElementById('downloadingMessage').style.display = 'none';
-        document.getElementById('completedMessage').style.display = 'block';
+          // Hide the downloading message
+          document.getElementById('downloadingMessage').style.display = 'none';
 
-        clearInterval(interval);
+          clearInterval(interval);
 
-        // Hide the completed message after a few seconds
-        setTimeout(() => {
-          document.getElementById('completedMessage').style.display = 'none';
-        }, 5000);
+          // Optionally show the generated message after a few seconds
+          setTimeout(() => {
+            document.getElementById('generatedMessage').style.display = 'block';
+            setTimeout(() => {
+              document.getElementById('generatedMessage').style.display = 'none';
+            }, 5000);
+          }, 0);
+        } else {
+          // Hide the downloading message and show the generated message
+          document.getElementById('downloadingMessage').style.display = 'none';
+
+          // Show the generated message
+          document.getElementById('generatedMessage').style.display = 'block';
+
+          clearInterval(interval);
+
+          // Optionally hide the generated message after a few seconds
+          setTimeout(() => {
+            document.getElementById('generatedMessage').style.display = 'none';
+          }, 5000);
+        }
       } else {
         // Handle bad request error (file type mismatch)
         document.getElementById('fileTypeError').style.display = 'block';
