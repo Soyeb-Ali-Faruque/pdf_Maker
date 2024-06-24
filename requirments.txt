@@ -2,6 +2,7 @@ Django
 pdfkit
 img2pdf
 Pillow
+pypdf2
 reportlab
 docx2pdf
 pywin32
