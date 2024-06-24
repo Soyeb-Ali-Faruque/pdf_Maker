@@ -46,7 +46,7 @@ urlpatterns = [
     path('delete_account/', views.delete_account_view, name='delete_account'),
     path('user_history/', views.user_history_view, name='user_history'),
 
-    # File conversion(work need to be finished)
+    # File conversion
     path('text_to_pdf/', views.text_to_pdf_view, name='text_to_pdf'),
     path('html_to_pdf/', views.html_to_pdf_view, name='html_to_pdf'),
     path('image_to_pdf/', views.img_to_pdf_view, name='image_to_pdf'),
