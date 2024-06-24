@@ -2,6 +2,7 @@ django
 pdfkit
 img2pdf
 pillow
+pypdf2
 reportlab
 #System requirments- libreoffice and wkhtmltopdf
 
